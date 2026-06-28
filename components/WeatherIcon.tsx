@@ -15,6 +15,7 @@ export function WeatherIcon({ icon, size = 64 }: WeatherIconProps) {
         source={{ uri: url }}
         style={{ width: size, height: size }}
         resizeMode="contain"
+        fadeDuration={200}
       />
     </View>
   );

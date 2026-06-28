@@ -1,5 +1,7 @@
 import { View, Text, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { GlassCard } from './GlassCard';
+import { theme } from '../constants/theme';
 
 interface ErrorStateProps {
   message: string;
@@ -8,27 +10,32 @@ interface ErrorStateProps {
 
 export function ErrorState({ message, onRetry }: ErrorStateProps) {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 }}>
-      <GlassCard style={{ padding: 32, alignItems: 'center', gap: 16, width: '100%', maxWidth: 300 }}>
-        <Text style={{ fontSize: 48 }}>🌤</Text>
-        <Text style={{ color: '#FFFFFF', fontSize: 18, fontWeight: '600', textAlign: 'center' }}>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: theme.spacing.xxxl }}>
+      <GlassCard style={{ padding: theme.spacing.xxxl, alignItems: 'center', gap: theme.spacing.lg, width: '100%', maxWidth: 300 }}>
+        <Ionicons name="cloud-offline-outline" size={48} color="rgba(255,255,255,0.3)" />
+        <Text style={{ color: theme.colors.text.primary, fontSize: theme.typography.heading, fontWeight: '600', textAlign: 'center' }}>
           Something went wrong
         </Text>
-        <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, textAlign: 'center' }}>
+        <Text style={{ color: theme.colors.text.tertiary, fontSize: theme.typography.body, textAlign: 'center', lineHeight: 20 }}>
           {message}
         </Text>
         {onRetry && (
           <TouchableOpacity
             onPress={onRetry}
+            activeOpacity={0.7}
             style={{
-              marginTop: 8,
-              paddingHorizontal: 24,
-              paddingVertical: 12,
-              borderRadius: 999,
-              backgroundColor: 'rgba(255,255,255,0.2)',
+              marginTop: theme.spacing.sm,
+              paddingHorizontal: theme.spacing.xxl,
+              paddingVertical: theme.spacing.md,
+              borderRadius: theme.radius.full,
+              backgroundColor: 'rgba(255,255,255,0.15)',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: theme.spacing.sm,
             }}
           >
-            <Text style={{ color: '#FFFFFF', fontWeight: '600' }}>Try Again</Text>
+            <Ionicons name="refresh-outline" size={18} color={theme.colors.white} />
+            <Text style={{ color: theme.colors.white, fontWeight: '600' }}>Try Again</Text>
           </TouchableOpacity>
         )}
       </GlassCard>

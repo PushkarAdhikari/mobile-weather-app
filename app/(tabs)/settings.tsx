@@ -6,6 +6,7 @@ import { useAppContext } from '../../constants/AppContext';
 import { useLocation } from '../../hooks/useLocation';
 import { useWeather } from '../../hooks/useWeather';
 import { DEFAULT_LOCATION } from '../../constants/api';
+import { theme } from '../../constants/theme';
 import { GradientBackground } from '../../components/GradientBackground';
 import { GlassCard } from '../../components/GlassCard';
 import { TemperatureUnit } from '../../types/weather';
@@ -24,68 +25,77 @@ export default function SettingsScreen() {
   return (
     <GradientBackground isDay={data?.current.is_day ?? 1} weatherCode={data?.current.condition.code ?? 1000}>
       <ScrollView
-        contentContainerStyle={{ paddingTop: insets.top + 16, paddingBottom: 40, paddingHorizontal: 20 }}
+        contentContainerStyle={{ paddingTop: insets.top + theme.spacing.lg, paddingBottom: 40, paddingHorizontal: theme.spacing.xl }}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={{ color: '#FFFFFF', fontSize: 24, fontWeight: '700', marginBottom: 24 }}>
+        <Text style={{ color: '#FFFFFF', fontSize: theme.typography.title, fontWeight: '700', marginBottom: theme.spacing.xxl }}>
           Settings
         </Text>
 
-        <GlassCard style={{ padding: 20, marginBottom: 16 }}>
-          <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: '600', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 16 }}>
-            Temperature Unit
+        <GlassCard style={{ padding: theme.spacing.xl, marginBottom: theme.spacing.lg }}>
+          <Text style={{ color: theme.colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '600', letterSpacing: 1, marginBottom: theme.spacing.lg }}>
+            TEMPERATURE UNIT
           </Text>
-          <View style={{ gap: 8 }}>
-            {units.map((item) => (
-              <TouchableOpacity
-                key={item.value}
-                onPress={() => setUnit(item.value)}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  paddingVertical: 12,
-                  paddingHorizontal: 16,
-                  borderRadius: 12,
-                  backgroundColor: unit === item.value ? 'rgba(255,255,255,0.15)' : 'transparent',
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                  <Ionicons name={item.icon} size={20} color="rgba(255,255,255,0.7)" />
-                  <Text style={{ color: '#FFFFFF', fontSize: 16 }}>{item.label}</Text>
-                </View>
-                {unit === item.value && (
-                  <Ionicons name="checkmark-circle" size={22} color="#4facfe" />
-                )}
-              </TouchableOpacity>
-            ))}
+          <View style={{ gap: theme.spacing.sm }}>
+            {units.map((item) => {
+              const selected = unit === item.value;
+              return (
+                <TouchableOpacity
+                  key={item.value}
+                  onPress={() => setUnit(item.value)}
+                  activeOpacity={0.7}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    paddingVertical: 14,
+                    paddingHorizontal: theme.spacing.lg,
+                    borderRadius: theme.radius.md,
+                    backgroundColor: selected ? 'rgba(79,172,254,0.15)' : 'transparent',
+                    borderWidth: 1,
+                    borderColor: selected ? 'rgba(79,172,254,0.25)' : 'transparent',
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
+                    <Ionicons name={item.icon} size={20} color={selected ? theme.colors.accent : theme.colors.text.tertiary} />
+                    <Text style={{ color: selected ? '#FFFFFF' : theme.colors.text.secondary, fontSize: theme.typography.bodyLg, fontWeight: selected ? '600' : '400' }}>
+                      {item.label}
+                    </Text>
+                  </View>
+                  {selected && (
+                    <Ionicons name="checkmark-circle" size={22} color={theme.colors.accent} />
+                  )}
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </GlassCard>
 
-        <GlassCard style={{ padding: 20, marginBottom: 16 }}>
-          <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: '600', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 16 }}>
-            About
+        <GlassCard style={{ padding: theme.spacing.xl, marginBottom: theme.spacing.lg }}>
+          <Text style={{ color: theme.colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '600', letterSpacing: 1, marginBottom: theme.spacing.lg }}>
+            ABOUT
           </Text>
-          <View style={{ gap: 12 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14 }}>App Version</Text>
-              <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '500' }}>1.0.0</Text>
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14 }}>Weather Source</Text>
-              <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '500' }}>WeatherAPI.com</Text>
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14 }}>Data Refresh</Text>
-              <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '500' }}>Every 30 min</Text>
-            </View>
+          <View style={{ gap: theme.spacing.lg }}>
+            <SettingsRow label="App Version" value="1.0.0" />
+            <SettingsRow label="Weather Source" value="Open-Meteo" />
+            <SettingsRow label="Data Refresh" value="Every 30 min" />
+            <SettingsRow label="API Type" value="Free, no key required" />
           </View>
         </GlassCard>
 
-        <Text style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12, textAlign: 'center', marginTop: 32 }}>
-          Weather App • Built with React Native + Expo
+        <Text style={{ color: theme.colors.text.muted, fontSize: theme.typography.caption, textAlign: 'center', marginTop: theme.spacing.xxxl, lineHeight: 18 }}>
+          Weather App {'\n'}Built with React Native + Expo
         </Text>
       </ScrollView>
     </GradientBackground>
+  );
+}
+
+function SettingsRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Text style={{ color: theme.colors.text.secondary, fontSize: theme.typography.body }}>{label}</Text>
+      <Text style={{ color: '#FFFFFF', fontSize: theme.typography.body, fontWeight: '500' }}>{value}</Text>
+    </View>
   );
 }

@@ -8,6 +8,7 @@ import { useWeather } from '../../hooks/useWeather';
 import { useLocation } from '../../hooks/useLocation';
 import { useAppContext } from '../../constants/AppContext';
 import { DEFAULT_LOCATION } from '../../constants/api';
+import { theme } from '../../constants/theme';
 import { GradientBackground } from '../../components/GradientBackground';
 import { GlassCard } from '../../components/GlassCard';
 import { AnimatedTemp } from '../../components/AnimatedTemp';
@@ -26,7 +27,6 @@ export default function HomeScreen() {
   const activeLng = selectedLocation?.lng ?? location?.lng ?? DEFAULT_LOCATION.lng;
 
   const { data, isLoading, isError, error, refetch } = useWeather(activeLat, activeLng);
-
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
@@ -36,74 +36,103 @@ export default function HomeScreen() {
   }, [refetch]);
 
   if (locLoading || isLoading) return <LoadingSkeleton />;
-
   if (isError) return <ErrorState message={error?.message || 'Failed to load weather'} onRetry={refetch} />;
-
   if (!data) return <ErrorState message="No weather data available" onRetry={refetch} />;
 
   const { current, forecast, location: loc } = data;
   const cityDisplay = selectedLocation?.name || cityName || loc.name;
+  const today = forecast.forecastday[0];
 
   return (
     <GradientBackground isDay={current.is_day} weatherCode={current.condition.code}>
       <ScrollView
-        contentContainerStyle={{ paddingTop: insets.top + 16, paddingBottom: 40 }}
+        contentContainerStyle={{ paddingTop: insets.top + theme.spacing.lg, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" colors={['#fff']} />
         }
       >
-        <View style={{ paddingHorizontal: 24 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <View style={{ paddingHorizontal: theme.spacing.xxl }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.lg }}>
             <TouchableOpacity
               onPress={() => router.push('/modal/city-search')}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+              activeOpacity={0.7}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                paddingHorizontal: theme.spacing.lg,
+                paddingVertical: theme.spacing.sm,
+                borderRadius: theme.radius.full,
+                gap: theme.spacing.sm,
+              }}
             >
-              <Ionicons name="location-outline" size={20} color="white" />
-              <Text style={{ color: '#FFFFFF', fontSize: 18, fontWeight: '600' }}>{cityDisplay}</Text>
-              <Ionicons name="chevron-down" size={16} color="rgba(255,255,255,0.6)" />
+              <Ionicons name="location-outline" size={18} color={theme.colors.white} />
+              <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '600' }} numberOfLines={1}>{cityDisplay}</Text>
+              <Ionicons name="chevron-down" size={14} color="rgba(255,255,255,0.6)" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={onRefresh}>
+            <TouchableOpacity onPress={onRefresh} activeOpacity={0.7} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
               <Ionicons name="refresh-outline" size={22} color="white" />
             </TouchableOpacity>
           </View>
 
-          <View style={{ alignItems: 'center', marginVertical: 32 }}>
+          <View style={{ alignItems: 'center', marginTop: theme.spacing.lg, marginBottom: theme.spacing.xxxl }}>
             <WeatherIcon icon={current.condition.icon} size={120} />
-            <AnimatedTemp
-              value={formatTemp(current.temp_c, current.temp_f, unit)}
-              unit={unit === 'celsius' ? 'C' : 'F'}
-              fontSize={72}
-            />
-            <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 18, marginTop: 4 }}>{current.condition.text}</Text>
-            <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, marginTop: 4 }}>
-              H: {formatTemp(forecast.forecastday[0].day.maxtemp_c, forecast.forecastday[0].day.maxtemp_f, unit)}° • L: {formatTemp(forecast.forecastday[0].day.mintemp_c, forecast.forecastday[0].day.mintemp_f, unit)}°
+            <AnimatedTemp value={formatTemp(current.temp_c, current.temp_f, unit)} unit={unit === 'celsius' ? 'C' : 'F'} />
+            <Text style={{ color: theme.colors.text.secondary, fontSize: theme.typography.heading, marginTop: theme.spacing.xs }}>
+              {current.condition.text}
             </Text>
+            <Text style={{ color: theme.colors.text.tertiary, fontSize: theme.typography.body, marginTop: theme.spacing.sm }}>
+              Feels like {formatTemp(current.feelslike_c, current.feelslike_f, unit)}°
+            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm, marginTop: theme.spacing.lg }}>
+              <Text style={{ color: theme.colors.text.secondary, fontSize: theme.typography.bodyLg }}>
+                H: {formatTemp(today.day.maxtemp_c, today.day.maxtemp_f, unit)}°
+              </Text>
+              <View style={{ width: 48, height: 2, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 1 }} />
+              <Text style={{ color: theme.colors.text.tertiary, fontSize: theme.typography.bodyLg }}>
+                L: {formatTemp(today.day.mintemp_c, today.day.mintemp_f, unit)}°
+              </Text>
+            </View>
           </View>
 
-          <GlassCard style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 16, paddingHorizontal: 8, marginBottom: 24 }}>
-            <DetailItem label="Feels Like" value={`${formatTemp(current.feelslike_c, current.feelslike_f, unit)}°`} icon="thermometer-outline" />
-            <DetailItem label="Humidity" value={`${current.humidity}%`} icon="water-outline" />
-            <DetailItem label="Wind" value={formatWindSpeed(current.wind_kph, unit)} icon="trending-up" />
-            <DetailItem label="UV" value={`${current.uv}`} icon="sunny-outline" />
+          <GlassCard style={{ flexDirection: 'row', flexWrap: 'wrap', padding: theme.spacing.lg, marginBottom: theme.spacing.xxl }}>
+            <StatItem icon="thermometer-outline" label="Feels Like" value={`${formatTemp(current.feelslike_c, current.feelslike_f, unit)}°`} />
+            <StatItem icon="water-outline" label="Humidity" value={`${current.humidity}%`} />
+            <StatItem icon="trending-up" label="Wind" value={formatWindSpeed(current.wind_kph, unit)} />
+            <StatItem icon="sunny-outline" label="UV Index" value={`${current.uv}`} />
           </GlassCard>
 
-          <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14, fontWeight: '600', marginBottom: 12, letterSpacing: 1, textTransform: 'uppercase' }}>
+          <Text style={{ color: theme.colors.text.primary, fontSize: theme.typography.bodyLg, fontWeight: '600', marginBottom: theme.spacing.lg }}>
             Hourly Forecast
           </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24 }}>
-            <View style={{ flexDirection: 'row', gap: 12 }}>
-              {(forecast.forecastday[0]?.hour || []).slice(0, 12).map((hour: any, i: number) => (
-                <GlassCard key={i} style={{ alignItems: 'center', paddingVertical: 16, paddingHorizontal: 16, minWidth: 72 }}>
-                  <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }}>
-                    {formatHourlyTime(hour.time, i)}
-                  </Text>
-                  <WeatherIcon icon={hour.condition.icon} size={32} />
-                  <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 14, marginTop: 4 }}>
-                    {formatTemp(hour.temp_c, hour.temp_f, unit)}°
-                  </Text>
-                </GlassCard>
-              ))}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: theme.spacing.xxl }}>
+            <View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
+              {(today?.hour || []).slice(0, 12).map((hour: any, i: number) => {
+                const isNow = i === 0;
+                return (
+                  <GlassCard
+                    key={i}
+                    style={{
+                      alignItems: 'center',
+                      paddingVertical: theme.spacing.lg,
+                      paddingHorizontal: theme.spacing.lg,
+                      minWidth: 68,
+                      backgroundColor: isNow ? 'rgba(79,172,254,0.2)' : theme.colors.glass.bg,
+                      borderColor: isNow ? 'rgba(79,172,254,0.3)' : theme.colors.glass.border,
+                    }}
+                  >
+                    <Text style={{ color: theme.colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: isNow ? '600' : '400' }}>
+                      {formatHourlyTime(hour.time, i)}
+                    </Text>
+                    <WeatherIcon icon={hour.condition.icon} size={28} />
+                    <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: theme.typography.body, marginTop: theme.spacing.xs }}>
+                      {formatTemp(hour.temp_c, hour.temp_f, unit)}°
+                    </Text>
+                  </GlassCard>
+                );
+              })}
             </View>
           </ScrollView>
         </View>
@@ -112,12 +141,12 @@ export default function HomeScreen() {
   );
 }
 
-function DetailItem({ label, value, icon }: { label: string; value: string; icon: keyof typeof Ionicons.glyphMap }) {
+function StatItem({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap; label: string; value: string }) {
   return (
-    <View style={{ alignItems: 'center', gap: 4 }}>
-      <Ionicons name={icon} size={18} color="rgba(255,255,255,0.6)" />
-      <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>{label}</Text>
-      <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 14 }}>{value}</Text>
+    <View style={{ width: '50%', alignItems: 'center', paddingVertical: theme.spacing.sm, gap: theme.spacing.xs }}>
+      <Ionicons name={icon} size={20} color={theme.colors.text.tertiary} />
+      <Text style={{ color: theme.colors.text.tertiary, fontSize: theme.typography.caption, letterSpacing: 0.5 }}>{label}</Text>
+      <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: theme.typography.bodyLg }}>{value}</Text>
     </View>
   );
 }
