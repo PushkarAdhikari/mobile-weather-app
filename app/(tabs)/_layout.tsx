@@ -7,7 +7,7 @@ function TabIcon({ name, focused }: { name: keyof typeof Ionicons.glyphMap; focu
     <Ionicons
       name={focused ? (name.replace('-outline', '') as any) : name}
       size={22}
-      color={focused ? theme.colors.white : theme.colors.text.muted}
+      color={focused ? theme.colors.text.primary : theme.colors.text.muted}
     />
   );
 }
@@ -18,19 +18,19 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: 'rgba(10, 22, 40, 0.9)',
+          backgroundColor: 'rgba(10, 22, 40, 0.95)',
           borderTopWidth: 0,
           elevation: 0,
-          height: 88,
-          paddingBottom: 32,
+          height: 92,
+          paddingBottom: 34,
           paddingTop: theme.spacing.sm,
         },
-        tabBarActiveTintColor: theme.colors.white,
+        tabBarActiveTintColor: theme.colors.text.primary,
         tabBarInactiveTintColor: theme.colors.text.muted,
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: '600',
-          letterSpacing: 0.3,
+          letterSpacing: 0.4,
         },
       }}
     >

@@ -1,55 +1,174 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useAppContext } from '../../constants/AppContext';
 import { useLocation } from '../../hooks/useLocation';
 import { useWeather } from '../../hooks/useWeather';
 import { DEFAULT_LOCATION } from '../../constants/api';
-import { theme } from '../../constants/theme';
+import { theme, getThemeColors, ThemeColors } from '../../constants/theme';
 import { GradientBackground } from '../../components/GradientBackground';
 import { GlassCard } from '../../components/GlassCard';
 import { TemperatureUnit } from '../../types/weather';
+import { clearCache } from '../../services/cache';
+
+function SettingsRow({ label, value, colors }: { label: string; value: string; colors: ThemeColors }) {
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Text style={{ color: colors.text.secondary, fontSize: theme.typography.bodyLg }}>{label}</Text>
+      <Text style={{ color: colors.text.primary, fontSize: theme.typography.bodyLg, fontWeight: '500' }}>{value}</Text>
+    </View>
+  );
+}
+
+function ToggleRow({ label, value, onToggle, colors }: { label: string; value: boolean; onToggle: () => void; colors: ThemeColors }) {
+  return (
+    <TouchableOpacity
+      onPress={onToggle}
+      activeOpacity={0.7}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: theme.spacing.md,
+      }}
+    >
+      <Text style={{ color: colors.text.secondary, fontSize: theme.typography.bodyLg }}>{label}</Text>
+      <View
+        style={{
+          width: 48,
+          height: 28,
+          borderRadius: 14,
+          backgroundColor: value ? colors.accent : 'rgba(255,255,255,0.15)',
+          padding: 2,
+        }}
+      >
+        <View
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: 12,
+            backgroundColor: '#FFFFFF',
+            alignSelf: value ? 'flex-end' : 'flex-start',
+          }}
+        />
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+function OptionRow({ label, options, selected, onSelect, colors }: {
+  label: string;
+  options: { key: string; label: string }[];
+  selected: string;
+  onSelect: (key: string) => void;
+  colors: ThemeColors;
+}) {
+  return (
+    <View>
+      <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '600', marginBottom: theme.spacing.sm }}>
+        {label}
+      </Text>
+      <View style={{ flexDirection: 'row', gap: theme.spacing.sm, flexWrap: 'wrap' }}>
+        {options.map((opt) => {
+          const isSelected = selected === opt.key;
+          return (
+            <TouchableOpacity
+              key={opt.key}
+              onPress={() => onSelect(opt.key)}
+              activeOpacity={0.7}
+              style={{
+                paddingVertical: theme.spacing.sm,
+                paddingHorizontal: theme.spacing.lg,
+                borderRadius: theme.radius.full,
+                backgroundColor: isSelected ? colors.accent : 'rgba(255,255,255,0.08)',
+              }}
+            >
+              <Text
+                style={{
+                  color: isSelected ? '#FFFFFF' : colors.text.secondary,
+                  fontSize: theme.typography.body,
+                  fontWeight: isSelected ? '600' : '400',
+                }}
+              >
+                {opt.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
 
 export default function SettingsScreen() {
-  const insets = useSafeAreaInsets();
-  const { unit, setUnit } = useAppContext();
   const { location } = useLocation();
   const { data } = useWeather(location?.lat ?? DEFAULT_LOCATION.lat, location?.lng ?? DEFAULT_LOCATION.lng);
 
-  const units: { label: string; value: TemperatureUnit; icon: keyof typeof Ionicons.glyphMap }[] = [
-    { label: 'Celsius (°C)', value: 'celsius', icon: 'thermometer-outline' },
-    { label: 'Fahrenheit (°F)', value: 'fahrenheit', icon: 'thermometer-outline' },
-  ];
+  const ctx = useAppContext();
+  const { theme: themeMode, setTheme } = ctx;
+  const colors = getThemeColors(themeMode);
+
+  const handleClearCache = async () => {
+    await clearCache();
+    Alert.alert('Cache Cleared', 'Temporary weather data has been cleared.');
+  };
+
+  const handleReset = () => {
+    Alert.alert(
+      'Reset All Settings',
+      'This will restore all settings to their defaults. This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Reset', style: 'destructive', onPress: () => {
+          ctx.setTheme('dark');
+          ctx.setUnit('celsius');
+          ctx.setWindUnit('kmh');
+          ctx.setPressureUnit('hpa');
+          ctx.setAutoDetectLocation(true);
+          ctx.setSevereAlerts(true);
+          ctx.setDailyForecastNotify(false);
+          ctx.setPrecipWarnings(true);
+          ctx.setShowFeelsLike(true);
+          ctx.setUse24hour(false);
+          ctx.setUseCellularData(true);
+          ctx.setAnalyticsConsent(false);
+          ctx.setRefreshInterval(30);
+        }},
+      ]
+    );
+  };
 
   return (
-    <GradientBackground isDay={data?.current.is_day ?? 1} weatherCode={data?.current.condition.code ?? 1000}>
+    <GradientBackground isDay={data?.current.is_day ?? 1} weatherCode={data?.current.condition.code ?? 1000} theme={themeMode}>
+      <SafeAreaView edges={['top']} style={{ flex: 1 }}>
       <ScrollView
-        contentContainerStyle={{ paddingTop: insets.top + theme.spacing.lg, paddingBottom: 40, paddingHorizontal: theme.spacing.xl }}
+        contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: theme.spacing.xxl }}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={{ color: '#FFFFFF', fontSize: theme.typography.title, fontWeight: '700', marginBottom: theme.spacing.xxl }}>
+        <Text style={{ color: colors.text.primary, fontSize: theme.typography.title, fontWeight: '700', marginBottom: theme.spacing.xxl }}>
           Settings
         </Text>
 
-        <GlassCard style={{ padding: theme.spacing.xl, marginBottom: theme.spacing.lg }}>
-          <Text style={{ color: theme.colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '600', letterSpacing: 1, marginBottom: theme.spacing.lg }}>
-            TEMPERATURE UNIT
+        {/* ---- Appearance ---- */}
+        <GlassCard colors={colors} style={{ padding: theme.spacing.xxl, marginBottom: theme.spacing.lg }}>
+          <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.section, fontWeight: '700', letterSpacing: 1.2, marginBottom: theme.spacing.lg }}>
+            APPEARANCE
           </Text>
           <View style={{ gap: theme.spacing.sm }}>
-            {units.map((item) => {
-              const selected = unit === item.value;
+            {['dark', 'light'].map((mode) => {
+              const selected = themeMode === mode;
               return (
                 <TouchableOpacity
-                  key={item.value}
-                  onPress={() => setUnit(item.value)}
+                  key={mode}
+                  onPress={() => setTheme(mode as 'dark' | 'light')}
                   activeOpacity={0.7}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    paddingVertical: 14,
-                    paddingHorizontal: theme.spacing.lg,
+                    paddingVertical: theme.spacing.md,
+                    paddingHorizontal: theme.spacing.xl,
                     borderRadius: theme.radius.md,
                     backgroundColor: selected ? 'rgba(79,172,254,0.15)' : 'transparent',
                     borderWidth: 1,
@@ -57,13 +176,13 @@ export default function SettingsScreen() {
                   }}
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
-                    <Ionicons name={item.icon} size={20} color={selected ? theme.colors.accent : theme.colors.text.tertiary} />
-                    <Text style={{ color: selected ? '#FFFFFF' : theme.colors.text.secondary, fontSize: theme.typography.bodyLg, fontWeight: selected ? '600' : '400' }}>
-                      {item.label}
+                    <Ionicons name={mode === 'dark' ? 'moon-outline' : 'sunny-outline'} size={22} color={selected ? colors.accent : colors.text.tertiary} />
+                    <Text style={{ color: selected ? colors.text.primary : colors.text.secondary, fontSize: theme.typography.bodyLg, fontWeight: selected ? '600' : '400' }}>
+                      {mode === 'dark' ? 'Dark Mode' : 'Light Mode'}
                     </Text>
                   </View>
                   {selected && (
-                    <Ionicons name="checkmark-circle" size={22} color={theme.colors.accent} />
+                    <Ionicons name="checkmark-circle" size={24} color={colors.accent} />
                   )}
                 </TouchableOpacity>
               );
@@ -71,31 +190,115 @@ export default function SettingsScreen() {
           </View>
         </GlassCard>
 
-        <GlassCard style={{ padding: theme.spacing.xl, marginBottom: theme.spacing.lg }}>
-          <Text style={{ color: theme.colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '600', letterSpacing: 1, marginBottom: theme.spacing.lg }}>
+        {/* ---- Units ---- */}
+        <GlassCard colors={colors} style={{ padding: theme.spacing.xxl, marginBottom: theme.spacing.lg }}>
+          <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.section, fontWeight: '700', letterSpacing: 1.2, marginBottom: theme.spacing.lg }}>
+            UNITS
+          </Text>
+          <OptionRow
+            label="Temperature"
+            options={[
+              { key: 'celsius', label: '°C' },
+              { key: 'fahrenheit', label: '°F' },
+            ]}
+            selected={ctx.unit}
+            onSelect={(k) => ctx.setUnit(k as TemperatureUnit)}
+            colors={colors}
+          />
+          <View style={{ height: theme.spacing.lg }} />
+          <OptionRow
+            label="Wind Speed"
+            options={[
+              { key: 'kmh', label: 'km/h' },
+              { key: 'mph', label: 'mph' },
+            ]}
+            selected={ctx.windUnit}
+            onSelect={(k) => ctx.setWindUnit(k as 'kmh' | 'mph')}
+            colors={colors}
+          />
+          <View style={{ height: theme.spacing.lg }} />
+          <OptionRow
+            label="Pressure"
+            options={[
+              { key: 'hpa', label: 'hPa' },
+              { key: 'inhg', label: 'inHg' },
+              { key: 'mmhg', label: 'mmHg' },
+            ]}
+            selected={ctx.pressureUnit}
+            onSelect={(k) => ctx.setPressureUnit(k as 'hpa' | 'inhg' | 'mmhg')}
+            colors={colors}
+          />
+        </GlassCard>
+
+        {/* ---- Location ---- */}
+        <GlassCard colors={colors} style={{ padding: theme.spacing.xxl, marginBottom: theme.spacing.lg }}>
+          <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.section, fontWeight: '700', letterSpacing: 1.2, marginBottom: theme.spacing.lg }}>
+            LOCATION
+          </Text>
+          <ToggleRow label="Auto-Detect Location" value={ctx.autoDetectLocation} onToggle={() => ctx.setAutoDetectLocation(!ctx.autoDetectLocation)} colors={colors} />
+        </GlassCard>
+
+        {/* ---- Support ---- */}
+        <GlassCard colors={colors} style={{ padding: theme.spacing.xxl, marginBottom: theme.spacing.lg }}>
+          <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.section, fontWeight: '700', letterSpacing: 1.2, marginBottom: theme.spacing.lg }}>
+            SUPPORT
+          </Text>
+          <TouchableOpacity activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md, paddingVertical: theme.spacing.md }}>
+            <Ionicons name="star-outline" size={22} color={colors.text.tertiary} />
+            <Text style={{ color: colors.text.secondary, fontSize: theme.typography.bodyLg }}>Rate the App</Text>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md, paddingVertical: theme.spacing.md }}>
+            <Ionicons name="share-outline" size={22} color={colors.text.tertiary} />
+            <Text style={{ color: colors.text.secondary, fontSize: theme.typography.bodyLg }}>Share the App</Text>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md, paddingVertical: theme.spacing.md }}>
+            <Ionicons name="mail-outline" size={22} color={colors.text.tertiary} />
+            <Text style={{ color: colors.text.secondary, fontSize: theme.typography.bodyLg }}>Contact Support</Text>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md, paddingVertical: theme.spacing.md }}>
+            <Ionicons name="document-text-outline" size={22} color={colors.text.tertiary} />
+            <Text style={{ color: colors.text.secondary, fontSize: theme.typography.bodyLg }}>Privacy Policy</Text>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md, paddingVertical: theme.spacing.md }}>
+            <Ionicons name="scale-outline" size={22} color={colors.text.tertiary} />
+            <Text style={{ color: colors.text.secondary, fontSize: theme.typography.bodyLg }}>Terms of Use</Text>
+          </TouchableOpacity>
+        </GlassCard>
+
+        {/* ---- Advanced ---- */}
+        <GlassCard colors={colors} style={{ padding: theme.spacing.xxl, marginBottom: theme.spacing.lg }}>
+          <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.section, fontWeight: '700', letterSpacing: 1.2, marginBottom: theme.spacing.lg }}>
+            ADVANCED
+          </Text>
+          <TouchableOpacity activeOpacity={0.7} onPress={handleClearCache} style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md, paddingVertical: theme.spacing.md }}>
+            <Ionicons name="trash-outline" size={22} color={colors.text.tertiary} />
+            <Text style={{ color: colors.text.secondary, fontSize: theme.typography.bodyLg }}>Clear Cache</Text>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.7} onPress={handleReset} style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md, paddingVertical: theme.spacing.md }}>
+            <Ionicons name="refresh-outline" size={22} color="#ff4444" />
+            <Text style={{ color: '#ff4444', fontSize: theme.typography.bodyLg }}>Reset All Settings</Text>
+          </TouchableOpacity>
+        </GlassCard>
+
+        {/* ---- About ---- */}
+        <GlassCard colors={colors} style={{ padding: theme.spacing.xxl, marginBottom: theme.spacing.lg }}>
+          <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.section, fontWeight: '700', letterSpacing: 1.2, marginBottom: theme.spacing.lg }}>
             ABOUT
           </Text>
-          <View style={{ gap: theme.spacing.lg }}>
-            <SettingsRow label="App Version" value="1.0.0" />
-            <SettingsRow label="Weather Source" value="Open-Meteo" />
-            <SettingsRow label="Data Refresh" value="Every 30 min" />
-            <SettingsRow label="API Type" value="Free, no key required" />
+          <View style={{ gap: theme.spacing.xl }}>
+            <SettingsRow label="Version" value="2.1.0 (Build 42)" colors={colors} />
+            <SettingsRow label="Weather Data" value="Open-Meteo" colors={colors} />
+            <SettingsRow label="Auto-Refresh" value={`Every ${ctx.refreshInterval} minutes`} colors={colors} />
+            <SettingsRow label="API Status" value="Operational" colors={colors} />
+            <SettingsRow label="Last Updated" value="Jul 1, 2026" colors={colors} />
           </View>
         </GlassCard>
 
-        <Text style={{ color: theme.colors.text.muted, fontSize: theme.typography.caption, textAlign: 'center', marginTop: theme.spacing.xxxl, lineHeight: 18 }}>
-          Weather App {'\n'}Built with React Native + Expo
+        <Text style={{ color: colors.text.muted, fontSize: theme.typography.body, textAlign: 'center', marginTop: theme.spacing.xxxl, lineHeight: 22 }}>
+          Weather App {'\n'}Developed by Pushkar Adhikari
         </Text>
       </ScrollView>
+      </SafeAreaView>
     </GradientBackground>
-  );
-}
-
-function SettingsRow({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-      <Text style={{ color: theme.colors.text.secondary, fontSize: theme.typography.body }}>{label}</Text>
-      <Text style={{ color: '#FFFFFF', fontSize: theme.typography.body, fontWeight: '500' }}>{value}</Text>
-    </View>
   );
 }

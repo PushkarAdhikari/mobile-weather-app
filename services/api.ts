@@ -1,5 +1,5 @@
-import { OPEN_METEO_BASE_URL, GEOCODING_BASE_URL } from '../constants/api';
-import { WeatherData, Location, HourlyForecast, DailyForecast } from '../types/weather';
+import { OPEN_METEO_BASE_URL, GEOCODING_BASE_URL, NWS_BASE_URL } from '../constants/api';
+import { WeatherData, Location, HourlyForecast, DailyForecast, WeatherAlert } from '../types/weather';
 
 const WMO_TEXT: Record<number, string> = {
   0: 'Clear', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
@@ -180,14 +180,124 @@ function transformOpenMeteoData(raw: OpenMeteoResponse): WeatherData {
       is_day: current.is_day,
     },
     forecast: { forecastday },
-    alerts: { alert: [] },
+    alerts: { alert: generateAlerts(current, daily) },
   };
+}
+
+function generateAlerts(current: OpenMeteoResponse['current'], daily: OpenMeteoResponse['daily']): WeatherAlert[] {
+  const alerts: WeatherAlert[] = [];
+  const code = current.weather_code;
+  const now = current.time;
+  const expiry = new Date(new Date(now).getTime() + 24 * 60 * 60 * 1000).toISOString();
+
+  if (code >= 95 && code <= 99) {
+    alerts.push({
+      headline: 'Thunderstorm Warning in Effect',
+      severity: 'Severe',
+      urgency: 'Immediate',
+      areas: 'Local Area',
+      category: 'Thunderstorm',
+      effective: now,
+      expires: expiry,
+      desc: 'A thunderstorm is currently active in your area. Expect heavy rain, frequent lightning, and strong wind gusts. Seek shelter indoors and avoid open areas, elevated ground, and bodies of water.',
+      instruction: 'Stay indoors. Unplug electronics. Avoid using plumbing. If driving, pull over safely and wait for the storm to pass.',
+    });
+  }
+
+  if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) {
+    const isHeavy = code === 65 || code === 67 || code === 82;
+    alerts.push({
+      headline: isHeavy ? 'Heavy Rain Advisory' : 'Rain Advisory',
+      severity: isHeavy ? 'Moderate' : 'Minor',
+      urgency: 'Expected',
+      areas: 'Local Area',
+      category: 'Rain',
+      effective: now,
+      expires: expiry,
+      desc: isHeavy
+        ? 'Heavy rainfall is expected in your area. Localized flooding may occur in low-lying areas and poor drainage locations.'
+        : 'Rain is expected in your area. Light to moderate precipitation anticipated throughout the day.',
+      instruction: isHeavy
+        ? 'Avoid flooded roads. Secure outdoor items. Allow extra travel time.'
+        : 'Carry an umbrella. Drive with caution on wet roads.',
+    });
+  }
+
+  if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) {
+    alerts.push({
+      headline: 'Snow Advisory',
+      severity: 'Moderate',
+      urgency: 'Expected',
+      areas: 'Local Area',
+      category: 'Snow',
+      effective: now,
+      expires: expiry,
+      desc: 'Snowfall is expected in your area. Accumulations may make travel difficult. Roads could become slippery and visibility may be reduced.',
+      instruction: 'Drive slowly. Keep emergency kit in vehicle. Dress warmly if going outside.',
+    });
+  }
+
+  if ((code >= 45 && code <= 48)) {
+    alerts.push({
+      headline: 'Fog Advisory',
+      severity: 'Minor',
+      urgency: 'Expected',
+      areas: 'Local Area',
+      category: 'Fog',
+      effective: now,
+      expires: expiry,
+      desc: 'Dense fog is reducing visibility in your area. Travel conditions may be hazardous, especially on highways and bridges.',
+      instruction: 'Use low beam headlights. Reduce speed. Increase following distance.',
+    });
+  }
+
+  if (daily && daily.wind_speed_10m_max && daily.wind_speed_10m_max.some((w) => w > 50)) {
+    alerts.push({
+      headline: 'Wind Advisory',
+      severity: 'Moderate',
+      urgency: 'Expected',
+      areas: 'Local Area',
+      category: 'Wind',
+      effective: now,
+      expires: expiry,
+      desc: 'Strong winds are forecast in your area. Gusts may cause minor damage to unsecured objects and make driving difficult for high-profile vehicles.',
+      instruction: 'Secure outdoor furniture. Avoid parking under trees. Use caution when driving.',
+    });
+  }
+
+  return alerts;
 }
 
 function formatTime(iso: string): string {
   const d = new Date(iso);
   if (isNaN(d.getTime())) return iso;
   return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
+async function fetchNWSAlerts(lat: number, lng: number): Promise<WeatherAlert[]> {
+  try {
+    const url = `${NWS_BASE_URL}/alerts/active?point=${lat},${lng}`;
+    const response = await fetch(url, {
+      headers: { 'User-Agent': 'WeatherApp/2.1 (pushkar@example.com)' },
+    });
+    if (!response.ok) return [];
+    const data = await response.json();
+    if (!data.features) return [];
+
+    return data.features.map((f: any): WeatherAlert => ({
+      headline: f.properties.headline || f.properties.event || 'Weather Alert',
+      severity: f.properties.severity || 'Unknown',
+      urgency: f.properties.urgency || 'Unknown',
+      areas: f.properties.areaDesc || 'Local Area',
+      category: f.properties.category || 'Weather',
+      effective: f.properties.effective || '',
+      expires: f.properties.expires || '',
+      desc: f.properties.description || '',
+      instruction: f.properties.instruction || '',
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export async function getCurrentWeather(lat: number, lng: number): Promise<WeatherData> {
@@ -209,7 +319,17 @@ export async function getCurrentWeather(lat: number, lng: number): Promise<Weath
   }
 
   const raw: OpenMeteoResponse = await response.json();
-  return transformOpenMeteoData(raw);
+  const data = transformOpenMeteoData(raw);
+
+  const [nwsAlerts] = await Promise.all([
+    fetchNWSAlerts(lat, lng),
+  ]);
+
+  if (nwsAlerts.length > 0) {
+    data.alerts = { alert: nwsAlerts };
+  }
+
+  return data;
 }
 
 export async function searchCities(query: string): Promise<Location[]> {

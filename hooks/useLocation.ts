@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import * as Location from 'expo-location';
-import { Location as LocationType } from '../types/weather';
 
 export function useLocation() {
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -22,16 +21,18 @@ export function useLocation() {
 
         const loc = await Location.getCurrentPositionAsync({});
         if (!mounted) return;
+        const { latitude, longitude } = loc.coords;
 
-        setLocation({ lat: loc.coords.latitude, lng: loc.coords.longitude });
+        setLocation({ lat: latitude, lng: longitude });
 
-        const geocode = await Location.reverseGeocodeAsync({
-          latitude: loc.coords.latitude,
-          longitude: loc.coords.longitude,
-        });
-
-        if (geocode.length > 0) {
-          setCityName(geocode[0].city || geocode[0].region || 'Unknown');
+        try {
+          const geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
+          const name = geocode.length > 0
+            ? (geocode[0].city || geocode[0].district || geocode[0].region || geocode[0].country || '')
+            : `${latitude.toFixed(1)}°, ${longitude.toFixed(1)}°`;
+          if (mounted) setCityName(name);
+        } catch {
+          if (mounted) setCityName(`${latitude.toFixed(1)}°, ${longitude.toFixed(1)}°`);
         }
       } catch (err) {
         if (mounted) setError('Failed to get location');

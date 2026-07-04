@@ -6,14 +6,15 @@ import { useState, useEffect, useRef } from 'react';
 
 import { searchCities } from '../../services/api';
 import { useAppContext } from '../../constants/AppContext';
-import { theme } from '../../constants/theme';
+import { theme, getThemeColors, ThemeColors } from '../../constants/theme';
 import { GlassCard } from '../../components/GlassCard';
 import { Location } from '../../types/weather';
 
 export default function CitySearchModal() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { setSelectedLocation } = useAppContext();
+  const { setSelectedLocation, theme: themeMode } = useAppContext();
+  const colors = getThemeColors(themeMode);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Location[]>([]);
   const [loading, setLoading] = useState(false);
@@ -62,10 +63,10 @@ export default function CitySearchModal() {
         <TouchableOpacity
           onPress={() => router.back()}
           activeOpacity={0.7}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={{ alignSelf: 'flex-start', marginBottom: theme.spacing.md }}
         >
-          <Ionicons name="arrow-back" size={24} color={theme.colors.white} />
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
         <View
           style={{
@@ -87,9 +88,9 @@ export default function CitySearchModal() {
             placeholderTextColor="rgba(255,255,255,0.35)"
             style={{
               flex: 1,
-              color: '#FFFFFF',
+              color: colors.text.primary,
               fontSize: theme.typography.bodyLg,
-              paddingVertical: theme.spacing.lg,
+                    paddingVertical: theme.spacing.xl,
               paddingHorizontal: theme.spacing.md,
             }}
             autoCapitalize="words"
@@ -119,11 +120,11 @@ export default function CitySearchModal() {
         keyboardShouldPersistTaps="handled"
         renderItem={({ item }) => (
           <TouchableOpacity activeOpacity={0.7} onPress={() => selectLocation(item)}>
-            <GlassCard style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.lg }}>
-              <Ionicons name="location-outline" size={20} color="rgba(255,255,255,0.4)" />
+            <GlassCard colors={colors} style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: theme.spacing.xl, paddingVertical: theme.spacing.xl }}>
+              <Ionicons name="location-outline" size={22} color="rgba(255,255,255,0.4)" />
               <View style={{ marginLeft: theme.spacing.md, flex: 1 }}>
-                <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: theme.typography.bodyLg }}>{item.name}</Text>
-                <Text style={{ color: theme.colors.text.muted, fontSize: theme.typography.caption, marginTop: 2 }}>
+                <Text style={{ color: colors.text.primary, fontWeight: '600', fontSize: theme.typography.bodyLg }}>{item.name}</Text>
+                <Text style={{ color: colors.text.muted, fontSize: theme.typography.body, marginTop: theme.spacing.xs }}>
                   {item.region ? `${item.region}, ` : ''}{item.country}
                 </Text>
               </View>
@@ -139,7 +140,7 @@ export default function CitySearchModal() {
           ) : query.trim().length >= 2 ? (
             <View style={{ alignItems: 'center', paddingVertical: theme.spacing.xxxl }}>
               <Ionicons name="map-outline" size={36} color="rgba(255,255,255,0.15)" />
-              <Text style={{ color: theme.colors.text.muted, fontSize: theme.typography.body, marginTop: theme.spacing.md }}>
+              <Text style={{ color: colors.text.muted, fontSize: theme.typography.body, marginTop: theme.spacing.md }}>
                 No cities found
               </Text>
             </View>

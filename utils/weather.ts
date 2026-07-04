@@ -35,19 +35,19 @@ export function getDayName(dateStr: string): string {
   return date.toLocaleDateString('en-US', { weekday: 'long' });
 }
 
-export function getHourFromTime(time: string): string {
+export function getHourFromTime(time: string, use24hour = false): string {
   const date = new Date(time.replace(' ', 'T'));
   if (isNaN(date.getTime())) return time;
-  return date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+  return date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: !use24hour });
 }
 
-export function getTimeFromDate(dateStr: string): string {
+export function getTimeFromDate(dateStr: string, use24hour = false): string {
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return dateStr;
   return date.toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true,
+    hour12: !use24hour,
   });
 }
 
@@ -62,14 +62,26 @@ export function getClosestHourIndex(hours: any[]): number {
   });
 }
 
-export function formatHourlyTime(time: string, index: number): string {
+export function formatHourlyTime(time: string, index: number, use24hour = false): string {
   if (index === 0) return 'Now';
   const date = new Date(time.replace(' ', 'T'));
   if (isNaN(date.getTime())) return time;
-  return date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+  return date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: !use24hour });
 }
 
 export function isDayTime(): boolean {
   const hour = new Date().getHours();
   return hour >= 6 && hour < 18;
 }
+
+export function formatDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return dateStr;
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+
