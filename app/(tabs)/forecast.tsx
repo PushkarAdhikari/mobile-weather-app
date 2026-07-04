@@ -95,7 +95,7 @@ function ForecastCard({ day, index, unit, colors }: { day: DailyForecast; index:
   return (
     <GlassCard colors={colors} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: theme.spacing.xl, paddingHorizontal: theme.spacing.xl }}>
       <View style={{ width: 88 }}>
-        <Text style={{ color: colors.text.primary, fontWeight: '600', fontSize: theme.typography.bodyLg }}>
+        <Text style={{ color: colors.text.primary, fontWeight: '600', fontSize: 15 }} numberOfLines={1}>
           {getDayName(day.date)}
         </Text>
         {index === 0 && (

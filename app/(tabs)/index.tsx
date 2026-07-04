@@ -20,7 +20,7 @@ import { DailyForecast } from '../../types/weather';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { unit, selectedLocation, theme: themeMode, showFeelsLike, use24hour, autoDetectLocation } = useAppContext();
+  const { unit, windUnit, selectedLocation, theme: themeMode, showFeelsLike, use24hour, autoDetectLocation } = useAppContext();
   const colors = getThemeColors(themeMode);
   const { location: loc, loading: locLoading, cityName } = useLocation();
 
@@ -117,7 +117,7 @@ export default function HomeScreen() {
             <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
               <Ionicons name="trending-up" size={20} color={colors.text.tertiary} />
               <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '500' }}>Wind</Text>
-              <Text style={{ color: colors.text.primary, fontWeight: '700', fontSize: theme.typography.bodyLg }}>{formatWindSpeed(current.wind_kph, unit)}</Text>
+              <Text style={{ color: colors.text.primary, fontWeight: '700', fontSize: theme.typography.bodyLg }}>{formatWindSpeed(current.wind_kph, windUnit)}</Text>
             </View>
             <View style={{ width: 1, backgroundColor: colors.surfaceBorder }} />
             <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
@@ -187,7 +187,7 @@ function CompactForecastRow({ day, index, unit, colors }: { day: DailyForecast; 
 
   return (
     <GlassCard colors={colors} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: theme.spacing.md, paddingHorizontal: theme.spacing.xl }}>
-      <Text style={{ color: colors.text.primary, fontWeight: '600', fontSize: theme.typography.bodyLg, width: 72 }}>
+      <Text style={{ color: colors.text.primary, fontWeight: '600', fontSize: 15, width: 72 }} numberOfLines={1}>
         {getDayName(day.date)}
       </Text>
       <WeatherIcon code={day.day.condition.code} size={28} />

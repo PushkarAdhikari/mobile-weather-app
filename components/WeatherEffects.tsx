@@ -1,5 +1,6 @@
 import { useEffect, useRef, useMemo } from 'react';
 import { View, Animated, Easing, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 type Effect = 'sun' | 'cloud' | 'cloudy' | 'fog' | 'rain' | 'heavy-rain' | 'snow' | 'storm' | null;
 
@@ -104,7 +105,7 @@ function SnowFlake({ x, delay }: { x: number; delay: number }) {
 function Snow() {
   const flakes = useMemo(() =>
     Array.from({ length: 25 }, (_, i) => ({ key: i, x: rand(0, W), delay: rand(0, 3000) })),
-  []);
+    []);
   return <>{flakes.map(({ key: k, ...f }) => <SnowFlake key={k} x={f.x} delay={f.delay} />)}</>;
 }
 
@@ -124,18 +125,18 @@ function Cloud({ x, size, speed }: { x: number; size: number; speed: number }) {
     <Animated.View
       style={{
         position: 'absolute', top: 60 + x, left: 0,
-        width: size, height: size * 0.4, borderRadius: size / 2,
-        backgroundColor: 'rgba(255,255,255,0.06)',
         transform: [{ translateX }],
       }}
-    />
+    >
+      <Ionicons name="cloud" size={size} color="rgba(255,255,255,0.07)" />
+    </Animated.View>
   );
 }
 
 function Clouds() {
   const clouds = useMemo(() =>
-    Array.from({ length: 3 }, (_, i) => ({ key: i, x: rand(0, 200), size: rand(120, 240), speed: rand(0.5, 1.5) })),
-  []);
+    Array.from({ length: 3 }, (_, i) => ({ key: i, x: rand(0, 200), size: rand(60, 100), speed: rand(0.5, 1.5) })),
+    []);
   return <>{clouds.map(({ key: k, ...c }) => <Cloud key={k} {...c} />)}</>;
 }
 
@@ -173,7 +174,7 @@ function MistBand({ top, width }: { top: number; width: number }) {
 function Fog() {
   const bands = useMemo(() =>
     Array.from({ length: 4 }, (_, i) => ({ key: i, top: rand(80, 500), width: rand(200, 350) })),
-  []);
+    []);
   return <>{bands.map(({ key: k, ...b }) => <MistBand key={k} {...b} />)}</>;
 }
 

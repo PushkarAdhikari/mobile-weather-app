@@ -97,3 +97,4 @@ export interface WeatherData {
 }
 
 export type TemperatureUnit = 'celsius' | 'fahrenheit';
+export type WindUnit = 'kmh' | 'mph';

@@ -1,4 +1,4 @@
-import { TemperatureUnit } from '../types/weather';
+import { TemperatureUnit, WindUnit } from '../types/weather';
 
 export function getWeatherGradient(isDay: number, code: number): [string, string] {
   if (!isDay) return ['#0f172a', '#1e293b'];
@@ -18,8 +18,8 @@ export function formatTemp(tempC: number, tempF: number, unit: TemperatureUnit):
   return unit === 'celsius' ? Math.round(tempC) : Math.round(tempF);
 }
 
-export function formatWindSpeed(kph: number, unit: TemperatureUnit): string {
-  if (unit === 'celsius') return `${Math.round(kph)} km/h`;
+export function formatWindSpeed(kph: number, unit: WindUnit): string {
+  if (unit === 'kmh') return `${Math.round(kph)} km/h`;
   return `${Math.round(kph * 0.621371)} mph`;
 }
 

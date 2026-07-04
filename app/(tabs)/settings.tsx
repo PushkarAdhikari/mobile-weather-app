@@ -238,33 +238,6 @@ export default function SettingsScreen() {
           <ToggleRow label="Auto-Detect Location" value={ctx.autoDetectLocation} onToggle={() => ctx.setAutoDetectLocation(!ctx.autoDetectLocation)} colors={colors} />
         </GlassCard>
 
-        {/* ---- Support ---- */}
-        <GlassCard colors={colors} style={{ padding: theme.spacing.xxl, marginBottom: theme.spacing.lg }}>
-          <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.section, fontWeight: '700', letterSpacing: 1.2, marginBottom: theme.spacing.lg }}>
-            SUPPORT
-          </Text>
-          <TouchableOpacity activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md, paddingVertical: theme.spacing.md }}>
-            <Ionicons name="star-outline" size={22} color={colors.text.tertiary} />
-            <Text style={{ color: colors.text.secondary, fontSize: theme.typography.bodyLg }}>Rate the App</Text>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md, paddingVertical: theme.spacing.md }}>
-            <Ionicons name="share-outline" size={22} color={colors.text.tertiary} />
-            <Text style={{ color: colors.text.secondary, fontSize: theme.typography.bodyLg }}>Share the App</Text>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md, paddingVertical: theme.spacing.md }}>
-            <Ionicons name="mail-outline" size={22} color={colors.text.tertiary} />
-            <Text style={{ color: colors.text.secondary, fontSize: theme.typography.bodyLg }}>Contact Support</Text>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md, paddingVertical: theme.spacing.md }}>
-            <Ionicons name="document-text-outline" size={22} color={colors.text.tertiary} />
-            <Text style={{ color: colors.text.secondary, fontSize: theme.typography.bodyLg }}>Privacy Policy</Text>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md, paddingVertical: theme.spacing.md }}>
-            <Ionicons name="scale-outline" size={22} color={colors.text.tertiary} />
-            <Text style={{ color: colors.text.secondary, fontSize: theme.typography.bodyLg }}>Terms of Use</Text>
-          </TouchableOpacity>
-        </GlassCard>
-
         {/* ---- Advanced ---- */}
         <GlassCard colors={colors} style={{ padding: theme.spacing.xxl, marginBottom: theme.spacing.lg }}>
           <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.section, fontWeight: '700', letterSpacing: 1.2, marginBottom: theme.spacing.lg }}>
