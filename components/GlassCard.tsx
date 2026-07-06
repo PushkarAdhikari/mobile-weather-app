@@ -1,4 +1,4 @@
-import { View, ViewProps, StyleSheet } from 'react-native';
+import { View, ViewProps } from 'react-native';
 import { theme, ThemeColors } from '../constants/theme';
 
 interface GlassCardProps extends ViewProps {
@@ -12,10 +12,9 @@ export function GlassCard({ children, style, colors, ...props }: GlassCardProps)
       style={[
         {
           borderRadius: theme.radius.xl,
-          backgroundColor: colors.surface,
-          borderWidth: StyleSheet.hairlineWidth,
-          borderColor: colors.surfaceBorder,
-          borderTopColor: colors.surfaceBorderLight,
+          backgroundColor: 'rgba(255,255,255,0.04)',
+          borderWidth: 1,
+          borderColor: 'rgba(255,255,255,0.08)',
         },
         style,
       ]}

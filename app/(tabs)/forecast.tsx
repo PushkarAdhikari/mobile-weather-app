@@ -47,7 +47,7 @@ export default function ForecastScreen() {
     <GradientBackground isDay={current.is_day} weatherCode={current.condition.code} theme={themeMode}>
       <SafeAreaView edges={['top']} style={{ flex: 1 }}>
         <ScrollView
-          contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: theme.spacing.xxl }}
+          contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: theme.spacing.xxl }}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" colors={['#fff']} />

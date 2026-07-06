@@ -1,8 +1,8 @@
 export const lightColors = {
   background: '#f0f4f8',
-  surface: 'rgba(255,255,255,0.7)',
+  surface: 'rgba(255,255,255,0.4)',
   surfaceBorder: 'rgba(0,0,0,0.06)',
-  surfaceBorderLight: 'rgba(255,255,255,0.5)',
+  surfaceBorderLight: 'rgba(255,255,255,0.3)',
   text: {
     primary: '#0f172a',
     secondary: 'rgba(15,23,42,0.72)',
@@ -15,9 +15,9 @@ export const lightColors = {
 
 export const darkColors = {
   background: '#0f172a',
-  surface: 'rgba(255,255,255,0.07)',
-  surfaceBorder: 'rgba(255,255,255,0.12)',
-  surfaceBorderLight: 'rgba(255,255,255,0.25)',
+  surface: 'rgba(255,255,255,0.04)',
+  surfaceBorder: 'rgba(255,255,255,0.08)',
+  surfaceBorderLight: 'rgba(255,255,255,0.12)',
   text: {
     primary: '#FFFFFF',
     secondary: 'rgba(255,255,255,0.72)',

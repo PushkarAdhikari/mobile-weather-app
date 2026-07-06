@@ -143,7 +143,7 @@ export default function SettingsScreen() {
     <GradientBackground isDay={data?.current.is_day ?? 1} weatherCode={data?.current.condition.code ?? 1000} theme={themeMode}>
       <SafeAreaView edges={['top']} style={{ flex: 1 }}>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: theme.spacing.xxl }}
+        contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: theme.spacing.xxl }}
         showsVerticalScrollIndicator={false}
       >
         <Text style={{ color: colors.text.primary, fontSize: theme.typography.title, fontWeight: '700', marginBottom: theme.spacing.xxl }}>

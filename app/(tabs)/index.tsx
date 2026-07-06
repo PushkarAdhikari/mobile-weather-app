@@ -1,7 +1,7 @@
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState, useCallback } from 'react';
 
 import { useWeather } from '../../hooks/useWeather';
@@ -17,6 +17,8 @@ import { LoadingSkeleton } from '../../components/LoadingSkeleton';
 import { ErrorState } from '../../components/ErrorState';
 import { formatHourlyTime, formatTemp, formatWindSpeed, formatPressure, formatVisibility, formatDate, getDayName } from '../../utils/weather';
 import { DailyForecast } from '../../types/weather';
+
+const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -64,29 +66,29 @@ export default function HomeScreen() {
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
-                <Ionicons name="location-outline" size={18} color={colors.text.primary} />
-                <Text style={{ color: colors.text.primary, fontSize: theme.typography.title, fontWeight: '700' }} numberOfLines={1}>
+                <Ionicons name="location" size={22} color="#60A5FA" />
+                <Text style={{ color: '#FFF', fontSize: 26, fontWeight: '700', letterSpacing: -0.5 }} numberOfLines={1}>
                   {cityDisplay}
                 </Text>
-                <Ionicons name="chevron-down" size={14} color={colors.text.tertiary} />
+                <Feather name="chevron-down" size={18} color="#94A3B8" />
               </View>
               <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.body, marginTop: 2, marginLeft: 28 }}>
                 {displayDate}
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={onRefresh} activeOpacity={0.7} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Ionicons name="refresh-outline" size={22} color={colors.text.primary} />
+            <TouchableOpacity onPress={onRefresh} activeOpacity={0.7} style={{ backgroundColor: 'rgba(255,255,255,0.08)', padding: 10, borderRadius: 50, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+              <Ionicons name="refresh" size={20} color="#FFF" />
             </TouchableOpacity>
           </View>
 
-          <View style={{ alignItems: 'center', marginTop: 0, marginBottom: theme.spacing.md }}>
-            <WeatherIcon code={current.condition.code} size={140} />
-            <AnimatedTemp colors={colors} value={formatTemp(current.temp_c, current.temp_f, unit)} unit={unit === 'celsius' ? 'C' : 'F'} />
-            <Text style={{ color: colors.text.secondary, fontSize: theme.typography.title, fontWeight: '500', marginTop: theme.spacing.sm }}>
+          <View style={{ alignItems: 'center', marginVertical: 30 }}>
+            <WeatherIcon code={current.condition.code} size={130} />
+            <AnimatedTemp colors={colors} value={formatTemp(current.temp_c, current.temp_f, unit)} unit={unit === 'celsius' ? 'C' : 'F'} fontSize={92} />
+            <Text style={{ color: '#FFF', fontSize: 24, fontWeight: '600', letterSpacing: -0.5, marginTop: 5 }}>
               {current.condition.text}
             </Text>
             {showFeelsLike && (
-              <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.bodyLg, marginTop: theme.spacing.xs }}>
+              <Text style={{ color: '#94A3B8', fontSize: 15, marginTop: 4 }}>
                 Feels like {formatTemp(current.feelslike_c, current.feelslike_f, unit)}°
               </Text>
             )}
@@ -107,44 +109,46 @@ export default function HomeScreen() {
             </GlassCard>
           </View>
 
-          <GlassCard colors={colors} style={{ paddingVertical: theme.spacing.lg, paddingHorizontal: theme.spacing.xxl, marginBottom: theme.spacing.xxl }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-              <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
-                <Ionicons name="water-outline" size={20} color={colors.text.tertiary} />
-                <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '500' }}>Humidity</Text>
-                <Text style={{ color: colors.text.primary, fontWeight: '700', fontSize: theme.typography.bodyLg }}>{current.humidity}%</Text>
+          <GlassCard colors={colors} style={{ paddingVertical: 22, marginBottom: theme.spacing.xxl }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', paddingHorizontal: 5 }}>
+              <View style={{ alignItems: 'center', gap: 5, width: (width - 80) / 3 }}>
+                <Ionicons name="water-outline" size={24} color="#60A5FA" />
+                <Text style={{ color: '#94A3B8', fontSize: 12, fontWeight: '500' }}>Humidity</Text>
+                <Text style={{ color: '#FFF', fontSize: 16, fontWeight: '700' }}>{current.humidity}%</Text>
               </View>
-              <View style={{ width: 1, backgroundColor: colors.surfaceBorder }} />
-              <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
-                <Ionicons name="trending-up" size={20} color={colors.text.tertiary} />
-                <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '500' }}>Wind</Text>
-                <Text style={{ color: colors.text.primary, fontWeight: '700', fontSize: theme.typography.bodyLg }}>{formatWindSpeed(current.wind_kph, windUnit)}</Text>
+              <View style={{ width: 1, height: 35, backgroundColor: 'rgba(255,255,255,0.08)' }} />
+              <View style={{ alignItems: 'center', gap: 5, width: (width - 80) / 3 }}>
+                <Feather name="wind" size={24} color="#34D399" />
+                <Text style={{ color: '#94A3B8', fontSize: 12, fontWeight: '500' }}>Wind</Text>
+                <Text style={{ color: '#FFF', fontSize: 16, fontWeight: '700' }}>{formatWindSpeed(current.wind_kph, windUnit)}</Text>
               </View>
-              <View style={{ width: 1, backgroundColor: colors.surfaceBorder }} />
-              <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
-                <Ionicons name="umbrella-outline" size={20} color={colors.text.tertiary} />
-                <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '500' }}>Rain</Text>
-                <Text style={{ color: colors.text.primary, fontWeight: '700', fontSize: theme.typography.bodyLg }}>{rainChance}%</Text>
+              <View style={{ width: 1, height: 35, backgroundColor: 'rgba(255,255,255,0.08)' }} />
+              <View style={{ alignItems: 'center', gap: 5, width: (width - 80) / 3 }}>
+                <Ionicons name="umbrella-outline" size={24} color="#F472B6" />
+                <Text style={{ color: '#94A3B8', fontSize: 12, fontWeight: '500' }}>Rain</Text>
+                <Text style={{ color: '#FFF', fontSize: 16, fontWeight: '700' }}>{rainChance}%</Text>
               </View>
             </View>
-            <View style={{ height: 1, backgroundColor: colors.surfaceBorder, marginVertical: theme.spacing.md }} />
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-              <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
-                <Ionicons name="speedometer-outline" size={20} color={colors.text.tertiary} />
-                <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '500' }}>Pressure</Text>
-                <Text style={{ color: colors.text.primary, fontWeight: '700', fontSize: theme.typography.bodyLg }}>{formatPressure(current.pressure_mb, pressureUnit)}</Text>
+
+            <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 18 }} />
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', paddingHorizontal: 5 }}>
+              <View style={{ alignItems: 'center', gap: 5, width: (width - 80) / 3 }}>
+                <MaterialCommunityIcons name="gauge" size={24} color="#A78BFA" />
+                <Text style={{ color: '#94A3B8', fontSize: 12, fontWeight: '500' }}>Pressure</Text>
+                <Text style={{ color: '#FFF', fontSize: 16, fontWeight: '700' }}>{formatPressure(current.pressure_mb, pressureUnit)}</Text>
               </View>
-              <View style={{ width: 1, backgroundColor: colors.surfaceBorder }} />
-              <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
-                <Ionicons name="sunny-outline" size={20} color={colors.text.tertiary} />
-                <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '500' }}>UV Index</Text>
-                <Text style={{ color: colors.text.primary, fontWeight: '700', fontSize: theme.typography.bodyLg }}>{current.uv}</Text>
+              <View style={{ width: 1, height: 35, backgroundColor: 'rgba(255,255,255,0.08)' }} />
+              <View style={{ alignItems: 'center', gap: 5, width: (width - 80) / 3 }}>
+                <Feather name="sun" size={24} color="#FBBF24" />
+                <Text style={{ color: '#94A3B8', fontSize: 12, fontWeight: '500' }}>UV Index</Text>
+                <Text style={{ color: '#FFF', fontSize: 16, fontWeight: '700' }}>{current.uv}</Text>
               </View>
-              <View style={{ width: 1, backgroundColor: colors.surfaceBorder }} />
-              <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
-                <Ionicons name="eye-outline" size={20} color={colors.text.tertiary} />
-                <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '500' }}>Visibility</Text>
-                <Text style={{ color: colors.text.primary, fontWeight: '700', fontSize: theme.typography.bodyLg }}>{formatVisibility(current.vis_km)}</Text>
+              <View style={{ width: 1, height: 35, backgroundColor: 'rgba(255,255,255,0.08)' }} />
+              <View style={{ alignItems: 'center', gap: 5, width: (width - 80) / 3 }}>
+                <Ionicons name="eye-outline" size={24} color="#2DD4BF" />
+                <Text style={{ color: '#94A3B8', fontSize: 12, fontWeight: '500' }}>Visibility</Text>
+                <Text style={{ color: '#FFF', fontSize: 16, fontWeight: '700' }}>{formatVisibility(current.vis_km)}</Text>
               </View>
             </View>
           </GlassCard>
@@ -154,7 +158,7 @@ export default function HomeScreen() {
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: theme.spacing.xxl }}>
             <View style={{ flexDirection: 'row', gap: theme.spacing.md }}>
-              {(today?.hour || []).slice(0, 12).map((hour: any, i: number) => {
+              {(today?.hour || []).slice(0, 24).map((hour: any, i: number) => {
                 const isNow = i === 0;
                 return (
                   <GlassCard
