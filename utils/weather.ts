@@ -1,5 +1,17 @@
 import { TemperatureUnit, WindUnit, PressureUnit } from '../types/weather';
 
+export function shiftHex(hex: string, amount: number): string {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = Math.min(255, Math.max(0, ((num >> 16) & 0xff) + amount));
+  const g = Math.min(255, Math.max(0, ((num >> 8) & 0xff) + amount));
+  const b = Math.min(255, Math.max(0, (num & 0xff) + amount));
+  return `rgb(${r},${g},${b})`;
+}
+
+export function shiftGradient(gradient: [string, string], amount: number): [string, string] {
+  return [shiftHex(gradient[0], amount), shiftHex(gradient[1], amount)];
+}
+
 export function getWeatherGradient(isDay: number, code: number): [string, string] {
   if (!isDay) return ['#0f172a', '#1e293b'];
 
@@ -33,16 +45,20 @@ export function formatVisibility(km: number): string {
   return `${km} km`;
 }
 
-export function getDayName(dateStr: string): string {
+export function getDayName(dateStr: string, lang: string = 'en'): string {
   const date = new Date(dateStr);
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  if (date.toDateString() === today.toDateString()) return 'Today';
-  if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+  if (date.toDateString() === today.toDateString()) return lang === 'en' ? 'Today' : lang === 'es' ? 'Hoy' : lang === 'fr' ? "Aujourd'hui" : lang === 'de' ? 'Heute' : lang === 'pt' ? 'Hoje' : 'Today';
+  if (date.toDateString() === tomorrow.toDateString()) return lang === 'en' ? 'Tomorrow' : lang === 'es' ? 'Mañana' : lang === 'fr' ? 'Demain' : lang === 'de' ? 'Morgen' : lang === 'pt' ? 'Amanhã' : 'Tomorrow';
 
-  return date.toLocaleDateString('en-US', { weekday: 'long' });
+  try {
+    return date.toLocaleDateString(lang === 'en' ? 'en-US' : lang, { weekday: 'long' });
+  } catch {
+    return date.toLocaleDateString('en-US', { weekday: 'long' });
+  }
 }
 
 export function getHourFromTime(time: string, use24hour = false): string {
@@ -61,22 +77,25 @@ export function getTimeFromDate(dateStr: string, use24hour = false): string {
   });
 }
 
-export function getClosestHourIndex(hours: any[]): number {
-  const now = new Date();
-  const currentHour = now.getHours();
-  const currentMin = now.getMinutes();
+export function getClosestHourIndex(hours: any[], currentTimeStr?: string): number {
+  const currentHour = currentTimeStr
+    ? parseInt(currentTimeStr.slice(11, 13), 10)
+    : new Date().getHours();
 
   return hours.findIndex((h: any) => {
-    const hourDate = new Date(h.time.replace(' ', 'T'));
-    return hourDate.getHours() >= currentHour && hourDate.getMinutes() >= 0;
+    const hourNum = parseInt(h.time?.slice(11, 13), 10);
+    return !isNaN(hourNum) && hourNum >= currentHour;
   });
 }
 
 export function formatHourlyTime(time: string, index: number, use24hour = false): string {
   if (index === 0) return 'Now';
-  const date = new Date(time.replace(' ', 'T'));
-  if (isNaN(date.getTime())) return time;
-  return date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: !use24hour });
+  const hourNum = parseInt(time?.slice(11, 13), 10);
+  if (isNaN(hourNum)) return time;
+  if (use24hour) return `${hourNum.toString().padStart(2, '0')}:00`;
+  const ampm = hourNum >= 12 ? 'PM' : 'AM';
+  const display = hourNum === 0 ? 12 : hourNum > 12 ? hourNum - 12 : hourNum;
+  return `${display} ${ampm}`;
 }
 
 export function isDayTime(): boolean {
@@ -92,6 +111,24 @@ export function formatDate(dateStr: string): string {
     month: 'long',
     day: 'numeric',
   });
+}
+
+export function parseHour12(timeStr: string): number {
+  const parts = timeStr.split(' ');
+  const ampm = parts[1] || '';
+  const [h] = (parts[0] || '0').split(':');
+  let hour = parseInt(h, 10);
+  if (ampm.toUpperCase() === 'PM' && hour !== 12) hour += 12;
+  if (ampm.toUpperCase() === 'AM' && hour === 12) hour = 0;
+  return hour;
+}
+
+export function isHourDaytime(hourStr: string, sunriseStr: string, sunsetStr: string): boolean {
+  const hour = parseInt(hourStr.slice(11, 13), 10);
+  if (!sunriseStr || !sunsetStr) return hour >= 6 && hour < 18;
+  const sunrise = parseHour12(sunriseStr);
+  const sunset = parseHour12(sunsetStr);
+  return hour >= sunrise && hour < sunset;
 }
 
 

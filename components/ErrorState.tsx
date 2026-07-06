@@ -29,7 +29,7 @@ export function ErrorState({ message, onRetry, colors }: ErrorStateProps) {
               paddingHorizontal: theme.spacing.xxl,
               paddingVertical: theme.spacing.md,
               borderRadius: theme.radius.full,
-              backgroundColor: 'rgba(255,255,255,0.15)',
+              backgroundColor: colors.surface,
               flexDirection: 'row',
               alignItems: 'center',
               gap: theme.spacing.sm,

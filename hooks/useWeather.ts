@@ -3,7 +3,7 @@ import { getCurrentWeather } from '../services/api';
 import { getCachedData, setCachedData } from '../services/cache';
 import { WeatherData } from '../types/weather';
 
-export function useWeather(lat: number | null, lng: number | null) {
+export function useWeather(lat: number | null, lng: number | null, refreshIntervalMin = 30) {
   return useQuery<WeatherData>({
     queryKey: ['weather', lat, lng],
     queryFn: async () => {
@@ -18,6 +18,7 @@ export function useWeather(lat: number | null, lng: number | null) {
     },
     enabled: lat !== null && lng !== null,
     staleTime: 1000 * 60 * 30,
+    refetchInterval: refreshIntervalMin < 60 ? 1000 * 60 * refreshIntervalMin : false,
     retry: 2,
   });
 }

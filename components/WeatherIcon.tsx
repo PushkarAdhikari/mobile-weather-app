@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 
-const WEATHER_EMOJI: Record<number, string> = {
+const WEATHER_EMOJI_DAY: Record<number, string> = {
   1000: '☀️',
   1003: '🌤',
   1006: '☁️',
@@ -49,6 +49,14 @@ const WEATHER_EMOJI: Record<number, string> = {
   1276: '⛈',
   1279: '⛈',
   1282: '⛈',
+};
+
+const WEATHER_EMOJI_NIGHT: Record<number, string> = {
+  1000: '🌙',
+  1003: '☁️',
+  1006: '☁️',
+  1009: '☁️',
+  1030: '🌫',
 };
 
 const WEATHER_TEXT: Record<number, string> = {
@@ -105,20 +113,24 @@ interface WeatherIconProps {
   code?: number;
   size?: number;
   showLabel?: boolean;
+  isDay?: boolean;
+  labelColor?: string;
 }
 
-export function WeatherIcon({ icon: _icon, code, size = 64, showLabel }: WeatherIconProps) {
-  const emoji = code !== undefined ? (WEATHER_EMOJI[code] ?? '🌤') : '🌤';
+export function WeatherIcon({ icon: _icon, code, size = 64, showLabel, isDay = true, labelColor }: WeatherIconProps) {
+  const map = isDay ? WEATHER_EMOJI_DAY : WEATHER_EMOJI_NIGHT;
+  const emoji = code !== undefined ? (map[code] ?? WEATHER_EMOJI_DAY[code] ?? '🌤') : '🌤';
   const label = code !== undefined ? (WEATHER_TEXT[code] ?? '') : '';
 
   return (
     <View style={{ alignItems: 'center', justifyContent: 'center', width: size, height: size }}>
       <Text style={{ fontSize: size * 0.7 }}>{emoji}</Text>
-      {showLabel && <Text style={{ fontSize: 10, color: '#fff', marginTop: 2 }}>{label}</Text>}
+      {showLabel && <Text style={{ fontSize: 10, color: labelColor || '#fff', marginTop: 2 }}>{label}</Text>}
     </View>
   );
 }
 
-export function getWeatherEmoji(code: number): string {
-  return WEATHER_EMOJI[code] ?? '🌤';
+export function getWeatherEmoji(code: number, isDay = true): string {
+  const map = isDay ? WEATHER_EMOJI_DAY : WEATHER_EMOJI_NIGHT;
+  return map[code] ?? WEATHER_EMOJI_DAY[code] ?? '🌤';
 }

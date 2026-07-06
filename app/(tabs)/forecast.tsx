@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -19,6 +19,7 @@ import { DailyForecast } from '../../types/weather';
 
 export default function ForecastScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { unit, selectedLocation, theme: themeMode, autoDetectLocation } = useAppContext();
   const colors = getThemeColors(themeMode);
   const { location: loc, loading: locLoading, cityName } = useLocation();
@@ -35,9 +36,9 @@ export default function ForecastScreen() {
     setRefreshing(false);
   }, [refetch]);
 
-  if ((autoDetectLocation && locLoading) || isLoading) return <LoadingSkeleton colors={colors} />;
-  if (isError) return <ErrorState colors={colors} message={error?.message || 'Failed to load forecast'} onRetry={refetch} />;
-  if (!data) return <ErrorState colors={colors} message="No forecast data available" onRetry={refetch} />;
+  if ((autoDetectLocation && locLoading) || isLoading) return <GradientBackground isDay={1} weatherCode={1000} theme={themeMode}><LoadingSkeleton colors={colors} /></GradientBackground>;
+  if (isError) return <GradientBackground isDay={1} weatherCode={1000} theme={themeMode}><ErrorState colors={colors} message={error?.message || 'Failed to load forecast'} onRetry={refetch} /></GradientBackground>;
+  if (!data) return <GradientBackground isDay={1} weatherCode={1000} theme={themeMode}><ErrorState colors={colors} message="No forecast data available" onRetry={refetch} /></GradientBackground>;
 
   const { current, forecast, location: weatherLoc } = data;
   const cityDisplay = selectedLocation?.name || (autoDetectLocation && cityName ? cityName : null) || (autoDetectLocation ? '' : 'Select a City') || 'Unknown';
@@ -47,10 +48,10 @@ export default function ForecastScreen() {
     <GradientBackground isDay={current.is_day} weatherCode={current.condition.code} theme={themeMode}>
       <SafeAreaView edges={['top']} style={{ flex: 1 }}>
         <ScrollView
-          contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: theme.spacing.xxl }}
+          contentContainerStyle={{ paddingBottom: 120 + insets.bottom, paddingHorizontal: theme.spacing.xxl, paddingTop: 10 }}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" colors={['#fff']} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.text.primary} colors={[colors.text.primary]} />
           }
         >
           <View style={{ marginBottom: theme.spacing.xxl }}>
@@ -115,7 +116,7 @@ function ForecastCard({ day, index, unit, colors }: { day: DailyForecast; index:
         <Text style={{ color: colors.text.tertiary, fontWeight: '500', fontSize: theme.typography.body, width: 28, textAlign: 'right' }}>
           {low}°
         </Text>
-        <View style={{ width: 40, height: 4, borderRadius: 2, overflow: 'hidden', backgroundColor: 'rgba(255,255,255,0.12)' }}>
+        <View style={{ width: 40, height: 4, borderRadius: 2, overflow: 'hidden', backgroundColor: colors.surface }}>
           <View
             style={{
               width: `${Math.min(Math.max((high - low) * 6 + 20, 20), 100)}%`,

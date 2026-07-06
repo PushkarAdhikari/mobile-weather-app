@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -32,6 +32,7 @@ const severityIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
 };
 
 export default function AlertsScreen() {
+  const insets = useSafeAreaInsets();
   const { selectedLocation, theme: themeMode, use24hour } = useAppContext();
   const colors = getThemeColors(themeMode);
   const { location } = useLocation();
@@ -49,9 +50,9 @@ export default function AlertsScreen() {
     setRefreshing(false);
   }, [refetch]);
 
-  if (isLoading) return <LoadingSkeleton colors={colors} />;
-  if (isError) return <ErrorState colors={colors} message={error?.message || 'Failed to load alerts'} onRetry={refetch} />;
-  if (!data) return <ErrorState colors={colors} message="No alert data available" onRetry={refetch} />;
+  if (isLoading) return <GradientBackground isDay={1} weatherCode={1000} theme={themeMode}><LoadingSkeleton colors={colors} /></GradientBackground>;
+  if (isError) return <GradientBackground isDay={1} weatherCode={1000} theme={themeMode}><ErrorState colors={colors} message={error?.message || 'Failed to load alerts'} onRetry={refetch} /></GradientBackground>;
+  if (!data) return <GradientBackground isDay={1} weatherCode={1000} theme={themeMode}><ErrorState colors={colors} message="No alert data available" onRetry={refetch} /></GradientBackground>;
 
   const alerts = data.alerts?.alert || [];
 
@@ -59,10 +60,10 @@ export default function AlertsScreen() {
     <GradientBackground isDay={data.current.is_day} weatherCode={data.current.condition.code} theme={themeMode}>
       <SafeAreaView edges={['top']} style={{ flex: 1 }}>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: theme.spacing.xxl }}
+        contentContainerStyle={{ paddingBottom: 120 + insets.bottom, paddingHorizontal: theme.spacing.xxl, paddingTop: 10 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" colors={['#fff']} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.text.primary} colors={[colors.text.primary]} />
         }
       >
         <Text style={{ color: colors.text.primary, fontSize: theme.typography.title, fontWeight: '700', marginBottom: theme.spacing.sm }}>
@@ -77,7 +78,7 @@ export default function AlertsScreen() {
 
         {alerts.length === 0 ? (
           <GlassCard colors={colors} style={{ alignItems: 'center', paddingVertical: theme.spacing.huge, paddingHorizontal: theme.spacing.xxl }}>
-            <Ionicons name="shield-checkmark-outline" size={64} color="rgba(255,255,255,0.2)" />
+            <Ionicons name="shield-checkmark-outline" size={64} color={colors.text.muted} />
             <Text style={{ color: colors.text.primary, fontSize: theme.typography.title, fontWeight: '600', marginTop: theme.spacing.xl }}>
               All Clear
             </Text>
@@ -124,7 +125,7 @@ export default function AlertsScreen() {
                               {alert.desc}
                             </Text>
                             {alert.instruction && (
-                              <View style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: theme.radius.md, padding: theme.spacing.lg }}>
+                              <View style={{ backgroundColor: colors.surface, borderRadius: theme.radius.md, padding: theme.spacing.lg }}>
                                 <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.section, fontWeight: '700', letterSpacing: 1.2, marginBottom: theme.spacing.sm }}>
                                   INSTRUCTION
                                 </Text>

@@ -12,9 +12,9 @@ export function GlassCard({ children, style, colors, ...props }: GlassCardProps)
       style={[
         {
           borderRadius: theme.radius.xl,
-          backgroundColor: 'rgba(255,255,255,0.04)',
+          backgroundColor: colors.surface,
           borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.08)',
+          borderColor: colors.surfaceBorder,
         },
         style,
       ]}

@@ -95,6 +95,13 @@ export interface WeatherData {
   alerts?: {
     alert: WeatherAlert[];
   };
+  airQuality?: AirQuality;
+}
+
+export interface AirQuality {
+  us_aqi: number;
+  pm2_5: number;
+  pm10: number;
 }
 
 export type TemperatureUnit = 'celsius' | 'fahrenheit';

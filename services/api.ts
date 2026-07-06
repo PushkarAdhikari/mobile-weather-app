@@ -1,5 +1,5 @@
-import { OPEN_METEO_BASE_URL, GEOCODING_BASE_URL, NWS_BASE_URL } from '../constants/api';
-import { WeatherData, Location, HourlyForecast, DailyForecast, WeatherAlert } from '../types/weather';
+import { OPEN_METEO_BASE_URL, AIR_QUALITY_BASE_URL, GEOCODING_BASE_URL, NWS_BASE_URL } from '../constants/api';
+import { WeatherData, Location, HourlyForecast, DailyForecast, WeatherAlert, AirQuality } from '../types/weather';
 
 const WMO_TEXT: Record<number, string> = {
   0: 'Clear', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
@@ -325,15 +325,41 @@ export async function getCurrentWeather(lat: number, lng: number): Promise<Weath
   const raw: OpenMeteoResponse = await response.json();
   const data = transformOpenMeteoData(raw);
 
-  const [nwsAlerts] = await Promise.all([
+  const [nwsAlerts, airQuality] = await Promise.all([
     fetchNWSAlerts(lat, lng),
+    fetchAirQuality(lat, lng),
   ]);
 
   if (nwsAlerts.length > 0) {
     data.alerts = { alert: nwsAlerts };
   }
 
+  if (airQuality) {
+    data.airQuality = airQuality;
+  }
+
   return data;
+}
+
+async function fetchAirQuality(lat: number, lng: number): Promise<AirQuality | null> {
+  try {
+    const params = new URLSearchParams({
+      latitude: lat.toString(),
+      longitude: lng.toString(),
+      current: 'us_aqi,pm2_5,pm10',
+    });
+    const url = `${AIR_QUALITY_BASE_URL}/air-quality?${params}`;
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const raw = await response.json();
+    return {
+      us_aqi: raw.current.us_aqi,
+      pm2_5: raw.current.pm2_5,
+      pm10: raw.current.pm10,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function searchCities(query: string): Promise<Location[]> {

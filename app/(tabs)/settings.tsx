@@ -1,6 +1,7 @@
-import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useState, useCallback } from 'react';
 
 import { useAppContext } from '../../constants/AppContext';
 import { useLocation } from '../../hooks/useLocation';
@@ -9,8 +10,11 @@ import { DEFAULT_LOCATION } from '../../constants/api';
 import { theme, getThemeColors, ThemeColors } from '../../constants/theme';
 import { GradientBackground } from '../../components/GradientBackground';
 import { GlassCard } from '../../components/GlassCard';
+import { LoadingSkeleton } from '../../components/LoadingSkeleton';
+import { ErrorState } from '../../components/ErrorState';
 import { TemperatureUnit, PressureUnit } from '../../types/weather';
 import { clearCache } from '../../services/cache';
+import { t, Language } from '../../utils/i18n';
 
 function SettingsRow({ label, value, colors }: { label: string; value: string; colors: ThemeColors }) {
   return (
@@ -26,6 +30,9 @@ function ToggleRow({ label, value, onToggle, colors }: { label: string; value: b
     <TouchableOpacity
       onPress={onToggle}
       activeOpacity={0.7}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: value }}
+      accessibilityLabel={label}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
@@ -39,7 +46,7 @@ function ToggleRow({ label, value, onToggle, colors }: { label: string; value: b
           width: 48,
           height: 28,
           borderRadius: 14,
-          backgroundColor: value ? colors.accent : 'rgba(255,255,255,0.15)',
+          backgroundColor: value ? colors.accent : colors.surface,
           padding: 2,
         }}
       >
@@ -77,11 +84,14 @@ function OptionRow({ label, options, selected, onSelect, colors }: {
               key={opt.key}
               onPress={() => onSelect(opt.key)}
               activeOpacity={0.7}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: isSelected }}
+              accessibilityLabel={`${label}: ${opt.label}`}
               style={{
                 paddingVertical: theme.spacing.sm,
                 paddingHorizontal: theme.spacing.lg,
                 borderRadius: theme.radius.full,
-                backgroundColor: isSelected ? colors.accent : 'rgba(255,255,255,0.08)',
+                backgroundColor: isSelected ? colors.accent : colors.surface,
               }}
             >
               <Text
@@ -102,12 +112,26 @@ function OptionRow({ label, options, selected, onSelect, colors }: {
 }
 
 export default function SettingsScreen() {
+  const insets = useSafeAreaInsets();
   const { location } = useLocation();
-  const { data } = useWeather(location?.lat ?? DEFAULT_LOCATION.lat, location?.lng ?? DEFAULT_LOCATION.lng);
+  const { data, isLoading, isError, error, refetch } = useWeather(location?.lat ?? DEFAULT_LOCATION.lat, location?.lng ?? DEFAULT_LOCATION.lng);
+  const [refreshing, setRefreshing] = useState(false);
 
   const ctx = useAppContext();
-  const { theme: themeMode, setTheme } = ctx;
-  const colors = getThemeColors(themeMode);
+  const { theme: themeMode, setTheme, language, setLanguage } = ctx;
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
+
+  if (isLoading) return <GradientBackground isDay={1} weatherCode={1000} theme={themeMode}><LoadingSkeleton colors={getThemeColors(themeMode)} /></GradientBackground>;
+  if (isError) return <GradientBackground isDay={1} weatherCode={1000} theme={themeMode}><ErrorState colors={getThemeColors(themeMode)} message={error?.message || 'Failed to load settings'} onRetry={refetch} /></GradientBackground>;
+
+  const isDay = data?.current.is_day ?? 1;
+  const weatherCode = data?.current.condition.code ?? 1000;
+  const colors = getThemeColors(themeMode, weatherCode, isDay);
 
   const handleClearCache = async () => {
     await clearCache();
@@ -116,11 +140,11 @@ export default function SettingsScreen() {
 
   const handleReset = () => {
     Alert.alert(
-      'Reset All Settings',
-      'This will restore all settings to their defaults. This action cannot be undone.',
+      t('reset_settings', language),
+      t('confirm_reset', language),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Reset', style: 'destructive', onPress: () => {
+        { text: t('cancel', language), style: 'cancel' },
+        { text: t('reset', language), style: 'destructive', onPress: () => {
           ctx.setTheme('dark');
           ctx.setUnit('celsius');
           ctx.setWindUnit('kmh');
@@ -140,20 +164,23 @@ export default function SettingsScreen() {
   };
 
   return (
-    <GradientBackground isDay={data?.current.is_day ?? 1} weatherCode={data?.current.condition.code ?? 1000} theme={themeMode}>
+    <GradientBackground isDay={isDay} weatherCode={weatherCode} theme={themeMode}>
       <SafeAreaView edges={['top']} style={{ flex: 1 }}>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: theme.spacing.xxl }}
+        contentContainerStyle={{ paddingBottom: 120 + insets.bottom, paddingHorizontal: theme.spacing.xxl, paddingTop: 10 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.text.primary} colors={[colors.text.primary]} />
+        }
       >
         <Text style={{ color: colors.text.primary, fontSize: theme.typography.title, fontWeight: '700', marginBottom: theme.spacing.xxl }}>
-          Settings
+          {t('settings', language)}
         </Text>
 
         {/* ---- Appearance ---- */}
         <GlassCard colors={colors} style={{ padding: theme.spacing.xxl, marginBottom: theme.spacing.lg }}>
           <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.section, fontWeight: '700', letterSpacing: 1.2, marginBottom: theme.spacing.lg }}>
-            APPEARANCE
+            {t('appearance', language)}
           </Text>
           <View style={{ gap: theme.spacing.sm }}>
             {['dark', 'light'].map((mode) => {
@@ -170,9 +197,9 @@ export default function SettingsScreen() {
                     paddingVertical: theme.spacing.md,
                     paddingHorizontal: theme.spacing.xl,
                     borderRadius: theme.radius.md,
-                    backgroundColor: selected ? 'rgba(79,172,254,0.15)' : 'transparent',
+                    backgroundColor: selected ? `${colors.accent}26` : 'transparent',
                     borderWidth: 1,
-                    borderColor: selected ? 'rgba(79,172,254,0.25)' : 'transparent',
+                    borderColor: selected ? `${colors.accent}40` : 'transparent',
                   }}
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
@@ -190,13 +217,33 @@ export default function SettingsScreen() {
           </View>
         </GlassCard>
 
+        {/* ---- Language ---- */}
+        <GlassCard colors={colors} style={{ padding: theme.spacing.xxl, marginBottom: theme.spacing.lg }}>
+          <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.section, fontWeight: '700', letterSpacing: 1.2, marginBottom: theme.spacing.lg }}>
+            {t('general', language)}
+          </Text>
+          <OptionRow
+            label={t('language', language)}
+            options={[
+              { key: 'en', label: 'English' },
+              { key: 'es', label: 'Español' },
+              { key: 'fr', label: 'Français' },
+              { key: 'de', label: 'Deutsch' },
+              { key: 'pt', label: 'Português' },
+            ]}
+            selected={language}
+            onSelect={(k) => setLanguage(k as Language)}
+            colors={colors}
+          />
+        </GlassCard>
+
         {/* ---- Units ---- */}
         <GlassCard colors={colors} style={{ padding: theme.spacing.xxl, marginBottom: theme.spacing.lg }}>
           <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.section, fontWeight: '700', letterSpacing: 1.2, marginBottom: theme.spacing.lg }}>
-            UNITS
+            {t('units', language)}
           </Text>
           <OptionRow
-            label="Temperature"
+            label={t('temperature', language)}
             options={[
               { key: 'celsius', label: '°C' },
               { key: 'fahrenheit', label: '°F' },
@@ -207,7 +254,7 @@ export default function SettingsScreen() {
           />
           <View style={{ height: theme.spacing.lg }} />
           <OptionRow
-            label="Wind Speed"
+            label={t('wind_speed', language)}
             options={[
               { key: 'kmh', label: 'km/h' },
               { key: 'mph', label: 'mph' },
@@ -218,7 +265,7 @@ export default function SettingsScreen() {
           />
           <View style={{ height: theme.spacing.lg }} />
           <OptionRow
-            label="Pressure"
+            label={t('pressure', language)}
             options={[
               { key: 'hpa', label: 'hPa' },
               { key: 'inhg', label: 'inHg' },
@@ -233,15 +280,15 @@ export default function SettingsScreen() {
         {/* ---- Location ---- */}
         <GlassCard colors={colors} style={{ padding: theme.spacing.xxl, marginBottom: theme.spacing.lg }}>
           <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.section, fontWeight: '700', letterSpacing: 1.2, marginBottom: theme.spacing.lg }}>
-            LOCATION
+            {t('location', language)}
           </Text>
-          <ToggleRow label="Auto-Detect Location" value={ctx.autoDetectLocation} onToggle={() => ctx.setAutoDetectLocation(!ctx.autoDetectLocation)} colors={colors} />
+          <ToggleRow label={t('auto_detect', language)} value={ctx.autoDetectLocation} onToggle={() => ctx.setAutoDetectLocation(!ctx.autoDetectLocation)} colors={colors} />
         </GlassCard>
 
         {/* ---- Advanced ---- */}
         <GlassCard colors={colors} style={{ padding: theme.spacing.xxl, marginBottom: theme.spacing.lg }}>
           <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.section, fontWeight: '700', letterSpacing: 1.2, marginBottom: theme.spacing.lg }}>
-            ADVANCED
+            {t('advanced', language)}
           </Text>
           <TouchableOpacity activeOpacity={0.7} onPress={handleClearCache} style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md, paddingVertical: theme.spacing.md }}>
             <Ionicons name="trash-outline" size={22} color={colors.text.tertiary} />
@@ -249,14 +296,14 @@ export default function SettingsScreen() {
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.7} onPress={handleReset} style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md, paddingVertical: theme.spacing.md }}>
             <Ionicons name="refresh-outline" size={22} color="#ff4444" />
-            <Text style={{ color: '#ff4444', fontSize: theme.typography.bodyLg }}>Reset All Settings</Text>
+            <Text style={{ color: '#ff4444', fontSize: theme.typography.bodyLg }}>{t('reset_settings', language)}</Text>
           </TouchableOpacity>
         </GlassCard>
 
         {/* ---- About ---- */}
         <GlassCard colors={colors} style={{ padding: theme.spacing.xxl, marginBottom: theme.spacing.lg }}>
           <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.section, fontWeight: '700', letterSpacing: 1.2, marginBottom: theme.spacing.lg }}>
-            ABOUT
+            {t('general', language)}
           </Text>
           <View style={{ gap: theme.spacing.xl }}>
             <SettingsRow label="Version" value="2.1.0 (Build 42)" colors={colors} />

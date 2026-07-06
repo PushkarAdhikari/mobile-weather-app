@@ -37,6 +37,9 @@ function CustomTabBar({ state, navigation }: any) {
             key={route.key}
             onPress={onPress}
             activeOpacity={0.8}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: isFocused }}
+            accessibilityLabel={tab.title}
             style={[styles.navItem, isFocused && styles.navItemActive]}
           >
             <TabIcon icon={tab.icon} iconSet={tab.iconSet} focused={isFocused} />

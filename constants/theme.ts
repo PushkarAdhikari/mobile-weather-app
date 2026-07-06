@@ -1,4 +1,4 @@
-export const lightColors = {
+export const baseLight = {
   background: '#f0f4f8',
   surface: 'rgba(255,255,255,0.4)',
   surfaceBorder: 'rgba(0,0,0,0.06)',
@@ -11,9 +11,9 @@ export const lightColors = {
   },
   accent: '#4facfe',
   accentGradient: ['#4facfe', '#00f2fe'] as const,
-} as const;
+};
 
-export const darkColors = {
+export const baseDark = {
   background: '#0f172a',
   surface: 'rgba(255,255,255,0.04)',
   surfaceBorder: 'rgba(255,255,255,0.08)',
@@ -26,9 +26,30 @@ export const darkColors = {
   },
   accent: '#4facfe',
   accentGradient: ['#4facfe', '#00f2fe'] as const,
-} as const;
+};
 
-export type ThemeColors = typeof darkColors;
+export interface ThemeColors {
+  background: string;
+  surface: string;
+  surfaceBorder: string;
+  surfaceBorderLight: string;
+  text: { primary: string; secondary: string; tertiary: string; muted: string };
+  accent: string;
+  accentGradient: readonly [string, string];
+}
+
+export function getWeatherAccent(isDay: boolean, code: number): { accent: string; accentGradient: [string, string] } {
+  if (!isDay) return { accent: '#818CF8', accentGradient: ['#4C1D95', '#818CF8'] };
+  if (code >= 1000 && code <= 1003) return { accent: '#4FACFE', accentGradient: ['#4FACFE', '#00F2FE'] };
+  if (code >= 1004 && code <= 1009) return { accent: '#94A3B8', accentGradient: ['#64748B', '#94A3B8'] };
+  if (code >= 1030 && code <= 1035) return { accent: '#8B9DC3', accentGradient: ['#6366F1', '#8B9DC3'] };
+  if (code >= 1063 && code <= 1171) return { accent: '#60A5FA', accentGradient: ['#3B82F6', '#60A5FA'] };
+  if (code >= 1201 && code <= 1237) return { accent: '#C084FC', accentGradient: ['#7C3AED', '#C084FC'] };
+  if (code >= 1240 && code <= 1246) return { accent: '#38BDF8', accentGradient: ['#0284C7', '#38BDF8'] };
+  if (code >= 1249 && code <= 1264) return { accent: '#E2E8F0', accentGradient: ['#A0AEC0', '#E2E8F0'] };
+  if (code >= 1273 && code <= 1282) return { accent: '#A78BFA', accentGradient: ['#6D28D9', '#A78BFA'] };
+  return { accent: '#4FACFE', accentGradient: ['#4FACFE', '#00F2FE'] };
+}
 
 export type ThemeSpacing = {
   xs: number;
@@ -84,14 +105,17 @@ export const radius = {
 
 // Backward-compatible theme object (defaults to dark mode)
 export const theme = {
-  colors: darkColors,
+  colors: baseDark,
   spacing,
   typography,
   radius,
-} as const;
+};
 
-export function getThemeColors(mode: 'dark' | 'light'): ThemeColors {
-  return mode === 'light' ? (lightColors as unknown as ThemeColors) : darkColors;
+export function getThemeColors(mode: 'dark' | 'light', weatherCode?: number, isDay?: number): ThemeColors {
+  const base = mode === 'light' ? baseLight : baseDark;
+  if (weatherCode === undefined || isDay === undefined) return base;
+  const { accent, accentGradient } = getWeatherAccent(isDay === 1, weatherCode);
+  return { ...base, accent, accentGradient };
 }
 
 export type ThemeMode = 'dark' | 'light';
