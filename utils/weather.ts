@@ -1,4 +1,4 @@
-import { TemperatureUnit, WindUnit } from '../types/weather';
+import { TemperatureUnit, WindUnit, PressureUnit } from '../types/weather';
 
 export function getWeatherGradient(isDay: number, code: number): [string, string] {
   if (!isDay) return ['#0f172a', '#1e293b'];
@@ -21,6 +21,16 @@ export function formatTemp(tempC: number, tempF: number, unit: TemperatureUnit):
 export function formatWindSpeed(kph: number, unit: WindUnit): string {
   if (unit === 'kmh') return `${Math.round(kph)} km/h`;
   return `${Math.round(kph * 0.621371)} mph`;
+}
+
+export function formatPressure(hpa: number, unit: PressureUnit): string {
+  if (unit === 'hpa') return `${Math.round(hpa)} hPa`;
+  if (unit === 'inhg') return `${(hpa * 0.02953).toFixed(2)} inHg`;
+  return `${Math.round(hpa * 0.75006)} mmHg`;
+}
+
+export function formatVisibility(km: number): string {
+  return `${km} km`;
 }
 
 export function getDayName(dateStr: string): string {

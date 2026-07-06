@@ -71,10 +71,13 @@ interface OpenMeteoResponse {
     weather_code: number;
     wind_speed_10m: number;
     wind_direction_10m: number;
+    wind_gusts_10m: number;
     uv_index: number;
     is_day: number;
     precipitation: number;
     cloud_cover: number;
+    surface_pressure: number;
+    visibility: number;
   };
   hourly: {
     time: string[];
@@ -172,10 +175,11 @@ function transformOpenMeteoData(raw: OpenMeteoResponse): WeatherData {
       humidity: current.relative_humidity_2m,
       cloud: current.cloud_cover,
       uv: Math.round(current.uv_index),
-      gust_mph: 0,
-      gust_kph: 0,
+      gust_mph: Math.round(current.wind_gusts_10m * 0.621371),
+      gust_kph: current.wind_gusts_10m,
       precip_mm: current.precipitation,
-      vis_km: 10,
+      pressure_mb: current.surface_pressure,
+      vis_km: Math.round(current.visibility / 1000),
       last_updated: current.time,
       is_day: current.is_day,
     },
@@ -304,7 +308,7 @@ export async function getCurrentWeather(lat: number, lng: number): Promise<Weath
   const params = new URLSearchParams({
     latitude: lat.toString(),
     longitude: lng.toString(),
-    current: 'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,uv_index,is_day,precipitation,cloud_cover',
+    current: 'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index,is_day,precipitation,cloud_cover,surface_pressure,visibility',
     hourly: 'temperature_2m,apparent_temperature,precipitation_probability,weather_code,wind_speed_10m,uv_index,relative_humidity_2m',
     daily: 'temperature_2m_max,temperature_2m_min,temperature_2m_mean,apparent_temperature_max,apparent_temperature_min,precipitation_sum,precipitation_probability_max,weather_code,wind_speed_10m_max,wind_gusts_10m_max,uv_index_max,sunrise,sunset',
     timezone: 'auto',

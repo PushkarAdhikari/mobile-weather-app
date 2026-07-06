@@ -15,12 +15,12 @@ import { AnimatedTemp } from '../../components/AnimatedTemp';
 import { WeatherIcon } from '../../components/WeatherIcon';
 import { LoadingSkeleton } from '../../components/LoadingSkeleton';
 import { ErrorState } from '../../components/ErrorState';
-import { formatHourlyTime, formatTemp, formatWindSpeed, formatDate, getDayName } from '../../utils/weather';
+import { formatHourlyTime, formatTemp, formatWindSpeed, formatPressure, formatVisibility, formatDate, getDayName } from '../../utils/weather';
 import { DailyForecast } from '../../types/weather';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { unit, windUnit, selectedLocation, theme: themeMode, showFeelsLike, use24hour, autoDetectLocation } = useAppContext();
+  const { unit, windUnit, pressureUnit, selectedLocation, theme: themeMode, showFeelsLike, use24hour, autoDetectLocation } = useAppContext();
   const colors = getThemeColors(themeMode);
   const { location: loc, loading: locLoading, cityName } = useLocation();
 
@@ -107,23 +107,45 @@ export default function HomeScreen() {
             </GlassCard>
           </View>
 
-          <GlassCard colors={colors} style={{ flexDirection: 'row', paddingVertical: theme.spacing.lg, paddingHorizontal: theme.spacing.xxl, marginBottom: theme.spacing.xxl, justifyContent: 'space-around' }}>
-            <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
-              <Ionicons name="water-outline" size={20} color={colors.text.tertiary} />
-              <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '500' }}>Humidity</Text>
-              <Text style={{ color: colors.text.primary, fontWeight: '700', fontSize: theme.typography.bodyLg }}>{current.humidity}%</Text>
+          <GlassCard colors={colors} style={{ paddingVertical: theme.spacing.lg, paddingHorizontal: theme.spacing.xxl, marginBottom: theme.spacing.xxl }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+              <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
+                <Ionicons name="water-outline" size={20} color={colors.text.tertiary} />
+                <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '500' }}>Humidity</Text>
+                <Text style={{ color: colors.text.primary, fontWeight: '700', fontSize: theme.typography.bodyLg }}>{current.humidity}%</Text>
+              </View>
+              <View style={{ width: 1, backgroundColor: colors.surfaceBorder }} />
+              <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
+                <Ionicons name="trending-up" size={20} color={colors.text.tertiary} />
+                <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '500' }}>Wind</Text>
+                <Text style={{ color: colors.text.primary, fontWeight: '700', fontSize: theme.typography.bodyLg }}>{formatWindSpeed(current.wind_kph, windUnit)}</Text>
+              </View>
+              <View style={{ width: 1, backgroundColor: colors.surfaceBorder }} />
+              <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
+                <Ionicons name="umbrella-outline" size={20} color={colors.text.tertiary} />
+                <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '500' }}>Rain</Text>
+                <Text style={{ color: colors.text.primary, fontWeight: '700', fontSize: theme.typography.bodyLg }}>{rainChance}%</Text>
+              </View>
             </View>
-            <View style={{ width: 1, backgroundColor: colors.surfaceBorder }} />
-            <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
-              <Ionicons name="trending-up" size={20} color={colors.text.tertiary} />
-              <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '500' }}>Wind</Text>
-              <Text style={{ color: colors.text.primary, fontWeight: '700', fontSize: theme.typography.bodyLg }}>{formatWindSpeed(current.wind_kph, windUnit)}</Text>
-            </View>
-            <View style={{ width: 1, backgroundColor: colors.surfaceBorder }} />
-            <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
-              <Ionicons name="umbrella-outline" size={20} color={colors.text.tertiary} />
-              <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '500' }}>Rain</Text>
-              <Text style={{ color: colors.text.primary, fontWeight: '700', fontSize: theme.typography.bodyLg }}>{rainChance}%</Text>
+            <View style={{ height: 1, backgroundColor: colors.surfaceBorder, marginVertical: theme.spacing.md }} />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+              <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
+                <Ionicons name="speedometer-outline" size={20} color={colors.text.tertiary} />
+                <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '500' }}>Pressure</Text>
+                <Text style={{ color: colors.text.primary, fontWeight: '700', fontSize: theme.typography.bodyLg }}>{formatPressure(current.pressure_mb, pressureUnit)}</Text>
+              </View>
+              <View style={{ width: 1, backgroundColor: colors.surfaceBorder }} />
+              <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
+                <Ionicons name="sunny-outline" size={20} color={colors.text.tertiary} />
+                <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '500' }}>UV Index</Text>
+                <Text style={{ color: colors.text.primary, fontWeight: '700', fontSize: theme.typography.bodyLg }}>{current.uv}</Text>
+              </View>
+              <View style={{ width: 1, backgroundColor: colors.surfaceBorder }} />
+              <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
+                <Ionicons name="eye-outline" size={20} color={colors.text.tertiary} />
+                <Text style={{ color: colors.text.tertiary, fontSize: theme.typography.caption, fontWeight: '500' }}>Visibility</Text>
+                <Text style={{ color: colors.text.primary, fontWeight: '700', fontSize: theme.typography.bodyLg }}>{formatVisibility(current.vis_km)}</Text>
+              </View>
             </View>
           </GlassCard>
 

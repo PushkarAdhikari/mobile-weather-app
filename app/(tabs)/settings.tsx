@@ -9,7 +9,7 @@ import { DEFAULT_LOCATION } from '../../constants/api';
 import { theme, getThemeColors, ThemeColors } from '../../constants/theme';
 import { GradientBackground } from '../../components/GradientBackground';
 import { GlassCard } from '../../components/GlassCard';
-import { TemperatureUnit } from '../../types/weather';
+import { TemperatureUnit, PressureUnit } from '../../types/weather';
 import { clearCache } from '../../services/cache';
 
 function SettingsRow({ label, value, colors }: { label: string; value: string; colors: ThemeColors }) {
@@ -225,7 +225,7 @@ export default function SettingsScreen() {
               { key: 'mmhg', label: 'mmHg' },
             ]}
             selected={ctx.pressureUnit}
-            onSelect={(k) => ctx.setPressureUnit(k as 'hpa' | 'inhg' | 'mmhg')}
+            onSelect={(k) => ctx.setPressureUnit(k as PressureUnit)}
             colors={colors}
           />
         </GlassCard>

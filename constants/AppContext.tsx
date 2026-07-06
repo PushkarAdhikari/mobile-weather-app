@@ -1,8 +1,7 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { TemperatureUnit, WindUnit, Location } from '../types/weather';
+import { TemperatureUnit, WindUnit, PressureUnit, Location } from '../types/weather';
 
 type ThemeMode = 'dark' | 'light';
-type PressureUnit = 'hpa' | 'inhg' | 'mmhg';
 type DistanceUnit = 'km' | 'mi';
 type RefreshInterval = 15 | 30 | 60;
 

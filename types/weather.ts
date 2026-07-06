@@ -21,6 +21,7 @@ export interface CurrentWeather {
   gust_mph: number;
   gust_kph: number;
   precip_mm: number;
+  pressure_mb: number;
   vis_km: number;
   last_updated: string;
   is_day: number;
@@ -98,3 +99,4 @@ export interface WeatherData {
 
 export type TemperatureUnit = 'celsius' | 'fahrenheit';
 export type WindUnit = 'kmh' | 'mph';
+export type PressureUnit = 'hpa' | 'inhg' | 'mmhg';
