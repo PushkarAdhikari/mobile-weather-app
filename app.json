@@ -1,31 +1,36 @@
 {
   "expo": {
-    "name": "Weather App",
-    "slug": "weather-app",
+    "name": "Climora: Weather Forecast",
+    "slug": "climora-weather-forecast",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "weather-app",
+    "scheme": "climora",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0a1628"
+      "backgroundColor": "#0A1628"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.weather.app",
+      "bundleIdentifier": "com.pushkaradhikari.climora",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "We need your location to provide accurate weather information."
+        "NSLocationWhenInUseUsageDescription": "Climora uses your location to provide accurate local weather forecasts."
       }
     },
     "android": {
+      "package": "com.pushkaradhikari.climora",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#0a1628"
+        "backgroundColor": "#0A1628"
       },
-      "package": "com.weather.app",
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -38,6 +43,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "0cbfdbf8-ab6d-4387-a51e-2564fc505a70"
+      }
     }
   }
 }
