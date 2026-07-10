@@ -146,8 +146,8 @@ function transformOpenMeteoData(raw: OpenMeteoResponse): WeatherData {
         uv: daily.uv_index_max[i] ?? 0,
       },
       astro: {
-        sunrise: daily.sunrise[i] ? formatTime(daily.sunrise[i]) : '',
-        sunset: daily.sunset[i] ? formatTime(daily.sunset[i]) : '',
+        sunrise: daily.sunrise[i] || '',
+        sunset: daily.sunset[i] || '',
         moon_phase: '',
       },
       hour: hours,
@@ -270,12 +270,6 @@ function generateAlerts(current: OpenMeteoResponse['current'], daily: OpenMeteoR
   }
 
   return alerts;
-}
-
-function formatTime(iso: string): string {
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return iso;
-  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
 async function fetchNWSAlerts(lat: number, lng: number): Promise<WeatherAlert[]> {

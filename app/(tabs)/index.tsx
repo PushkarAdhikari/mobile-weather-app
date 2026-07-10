@@ -19,7 +19,7 @@ import { WeatherScene } from '../../components/WeatherScene';
 import { LoadingSkeleton } from '../../components/LoadingSkeleton';
 import { ErrorState } from '../../components/ErrorState';
 import { AirQualityGauge } from '../../components/AirQualityGauge';
-import { formatHourlyTime, formatTemp, formatWindSpeed, formatPressure, formatVisibility, formatDate, getDayName, getClosestHourIndex, isHourDaytime } from '../../utils/weather';
+import { formatHourlyTime, formatTemp, formatWindSpeed, formatPressure, formatVisibility, formatDate, getDayName, getClosestHourIndex, isHourDaytime, formatISOTime } from '../../utils/weather';
 import { notifyNewAlerts } from '../../utils/notifications';
 import { t, Language } from '../../utils/i18n';
 import { DailyForecast } from '../../types/weather';
@@ -204,7 +204,7 @@ export default function HomeScreen() {
             </View>
           )}
 
-          <SunArc sunrise={sunrise} sunset={sunset} date={today.date} language={language} colors={colors} />
+          <SunArc sunrise={sunrise} sunset={sunset} language={language} colors={colors} />
 
           <Text style={{ color: colors.text.secondary, fontSize: theme.typography.section, fontWeight: '700', letterSpacing: 1.2, marginBottom: theme.spacing.lg }}>
             {t('hourly_forecast', language)}
@@ -251,15 +251,19 @@ export default function HomeScreen() {
   );
 }
 
-const SunArc = memo(function SunArc({ sunrise, sunset, date, language, colors }: { sunrise: string; sunset: string; date: string; language: Language; colors: ThemeColors }) {
+const SunArc = memo(function SunArc({ sunrise, sunset, language, colors }: { sunrise: string; sunset: string; language: Language; colors: ThemeColors }) {
   const arcWidth = width - theme.spacing.xxl * 2 - 32;
   const arcHeight = 60;
 
+  const sunriseDisplay = useMemo(() => formatISOTime(sunrise), [sunrise]);
+  const sunsetDisplay = useMemo(() => formatISOTime(sunset), [sunset]);
+
   const getProgress = () => {
-    if (!sunrise || !sunset || !date) return 0;
+    if (!sunrise || !sunset) return 0;
     const now = new Date();
-    const sunriseDate = new Date(`${date} ${sunrise}`);
-    const sunsetDate = new Date(`${date} ${sunset}`);
+    const sunriseDate = new Date(sunrise);
+    const sunsetDate = new Date(sunset);
+    if (isNaN(sunriseDate.getTime()) || isNaN(sunsetDate.getTime())) return 0;
     const dayLen = sunsetDate.getTime() - sunriseDate.getTime();
     const elapsed = now.getTime() - sunriseDate.getTime();
     return dayLen > 0 ? Math.max(0, Math.min(1, elapsed / dayLen)) : 0;
@@ -294,14 +298,14 @@ const SunArc = memo(function SunArc({ sunrise, sunset, date, language, colors }:
               <Feather name="sunrise" size={14} color="#FBBF24" />
               <Text style={{ color: colors.text.tertiary, fontSize: 11, fontWeight: '500' }}>{t('sunrise', language)}</Text>
             </View>
-            <Text style={{ color: colors.text.primary, fontSize: 15, fontWeight: '600', marginTop: 2 }}>{sunrise}</Text>
+            <Text style={{ color: colors.text.primary, fontSize: 15, fontWeight: '600', marginTop: 2 }}>{sunriseDisplay}</Text>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
               <Feather name="sunset" size={14} color="#F97316" />
               <Text style={{ color: colors.text.tertiary, fontSize: 11, fontWeight: '500' }}>{t('sunset', language)}</Text>
             </View>
-            <Text style={{ color: colors.text.primary, fontSize: 15, fontWeight: '600', marginTop: 2 }}>{sunset}</Text>
+            <Text style={{ color: colors.text.primary, fontSize: 15, fontWeight: '600', marginTop: 2 }}>{sunsetDisplay}</Text>
           </View>
         </View>
       </View>

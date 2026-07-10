@@ -113,22 +113,22 @@ export function formatDate(dateStr: string): string {
   });
 }
 
-export function parseHour12(timeStr: string): number {
-  const parts = timeStr.split(' ');
-  const ampm = parts[1] || '';
-  const [h] = (parts[0] || '0').split(':');
-  let hour = parseInt(h, 10);
-  if (ampm.toUpperCase() === 'PM' && hour !== 12) hour += 12;
-  if (ampm.toUpperCase() === 'AM' && hour === 12) hour = 0;
-  return hour;
-}
-
 export function isHourDaytime(hourStr: string, sunriseStr: string, sunsetStr: string): boolean {
   const hour = parseInt(hourStr.slice(11, 13), 10);
-  if (!sunriseStr || !sunsetStr) return hour >= 6 && hour < 18;
-  const sunrise = parseHour12(sunriseStr);
-  const sunset = parseHour12(sunsetStr);
+  if (!sunriseStr || !sunsetStr || sunriseStr.length < 13 || sunsetStr.length < 13) return hour >= 6 && hour < 18;
+  const sunrise = parseInt(sunriseStr.slice(11, 13), 10);
+  const sunset = parseInt(sunsetStr.slice(11, 13), 10);
+  if (isNaN(sunrise) || isNaN(sunset)) return hour >= 6 && hour < 18;
   return hour >= sunrise && hour < sunset;
+}
+
+export function formatISOTime(iso: string): string {
+  if (!iso || iso.length < 16) return iso || '';
+  const hour = parseInt(iso.slice(11, 13), 10);
+  const min = iso.slice(14, 16);
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const display = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  return `${display}:${min} ${ampm}`;
 }
 
 
