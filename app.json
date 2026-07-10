@@ -39,8 +39,16 @@
     },
     "plugins": [
       "expo-router",
-      "expo-location"
+      "expo-location",
+      "expo-updates"
     ],
+    "updates": {
+      "url": "https://u.expo.dev/0cbfdbf8-ab6d-4387-a51e-2564fc505a70",
+      "fallbackToCacheTimeout": 30000
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "experiments": {
       "typedRoutes": true
     },
