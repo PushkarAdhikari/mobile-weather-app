@@ -33,7 +33,7 @@ export async function requestNotificationPermissions(): Promise<boolean> {
   return true;
 }
 
-export async function getNotifiedAlertHeadlines(): Promise<string[]> {
+async function getNotifiedAlertHeadlines(): Promise<string[]> {
   try {
     const raw = await AsyncStorage.getItem(NOTIFIED_ALERTS_KEY);
     return raw ? JSON.parse(raw) : [];

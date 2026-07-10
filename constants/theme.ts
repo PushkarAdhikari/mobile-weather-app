@@ -1,4 +1,4 @@
-export const baseLight = {
+const baseLight = {
   background: '#f0f4f8',
   surface: 'rgba(255,255,255,0.4)',
   surfaceBorder: 'rgba(0,0,0,0.06)',
@@ -13,7 +13,7 @@ export const baseLight = {
   accentGradient: ['#4facfe', '#00f2fe'] as const,
 };
 
-export const baseDark = {
+const baseDark = {
   background: '#0f172a',
   surface: 'rgba(255,255,255,0.04)',
   surfaceBorder: 'rgba(255,255,255,0.08)',
@@ -38,7 +38,7 @@ export interface ThemeColors {
   accentGradient: readonly [string, string];
 }
 
-export function getWeatherAccent(isDay: boolean, code: number): { accent: string; accentGradient: [string, string] } {
+function getWeatherAccent(isDay: boolean, code: number): { accent: string; accentGradient: [string, string] } {
   if (!isDay) return { accent: '#818CF8', accentGradient: ['#4C1D95', '#818CF8'] };
   if (code >= 1000 && code <= 1003) return { accent: '#4FACFE', accentGradient: ['#4FACFE', '#00F2FE'] };
   if (code >= 1004 && code <= 1009) return { accent: '#94A3B8', accentGradient: ['#64748B', '#94A3B8'] };
@@ -51,7 +51,7 @@ export function getWeatherAccent(isDay: boolean, code: number): { accent: string
   return { accent: '#4FACFE', accentGradient: ['#4FACFE', '#00F2FE'] };
 }
 
-export type ThemeSpacing = {
+type ThemeSpacing = {
   xs: number;
   sm: number;
   md: number;
@@ -62,7 +62,7 @@ export type ThemeSpacing = {
   huge: number;
 };
 
-export type ThemeTypography = {
+type ThemeTypography = {
   caption: number;
   body: number;
   bodyLg: number;
@@ -118,4 +118,4 @@ export function getThemeColors(mode: 'dark' | 'light', weatherCode?: number, isD
   return { ...base, accent, accentGradient };
 }
 
-export type ThemeMode = 'dark' | 'light';
+type ThemeMode = 'dark' | 'light';

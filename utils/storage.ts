@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SETTINGS_KEY = '@weather_app/settings';
 
-export interface PersistedSettings {
+interface PersistedSettings {
   unit: string;
   windUnit: string;
   pressureUnit: string;
@@ -33,6 +33,4 @@ export async function loadSettings(): Promise<Partial<PersistedSettings>> {
   return JSON.parse(raw);
 }
 
-export async function clearSettings(): Promise<void> {
-  await AsyncStorage.removeItem(SETTINGS_KEY);
-}
+

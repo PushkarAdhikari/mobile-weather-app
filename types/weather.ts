@@ -6,7 +6,7 @@ export interface Location {
   country?: string;
 }
 
-export interface CurrentWeather {
+interface CurrentWeather {
   temp_c: number;
   temp_f: number;
   feelslike_c: number;
@@ -27,7 +27,7 @@ export interface CurrentWeather {
   is_day: number;
 }
 
-export interface Condition {
+interface Condition {
   text: string;
   icon: string;
   code: number;

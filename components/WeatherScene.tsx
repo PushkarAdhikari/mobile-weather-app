@@ -3,8 +3,6 @@ import { View } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, withSequence, Easing } from 'react-native-reanimated';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 
-const PARTICLE_COUNT = 8;
-
 function SunScene({ size }: { size: number }) {
   const rotation = useSharedValue(0);
   const glow = useSharedValue(0);

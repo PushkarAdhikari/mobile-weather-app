@@ -36,24 +36,6 @@ export async function setCachedData<T>(key: string, data: T): Promise<void> {
   }
 }
 
-export async function getCachedDataWithAge<T>(key: string): Promise<{ data: T | null; age: number | null }> {
-  try {
-    const raw = await AsyncStorage.getItem(key);
-    if (!raw) return { data: null, age: null };
-
-    const entry: CacheEntry<T> = JSON.parse(raw);
-    const age = Date.now() - entry.timestamp;
-
-    if (age > CACHE_DURATION_MS) {
-      return { data: entry.data, age };
-    }
-
-    return { data: entry.data, age };
-  } catch {
-    return { data: null, age: null };
-  }
-}
-
 export async function clearCache(): Promise<void> {
   try {
     const keys = await AsyncStorage.getAllKeys();

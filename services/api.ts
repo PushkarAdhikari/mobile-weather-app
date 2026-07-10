@@ -374,16 +374,4 @@ export async function searchCities(query: string): Promise<Location[]> {
   }));
 }
 
-export async function fetchWeatherByCity(city: string): Promise<WeatherData> {
-  const coords = await geoCodeCity(city);
-  return getCurrentWeather(coords.lat, coords.lng);
-}
 
-async function geoCodeCity(city: string): Promise<{ lat: number; lng: number }> {
-  const url = `${GEOCODING_BASE_URL}/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
-  const response = await fetch(url);
-  if (!response.ok) throw new Error('Geocoding failed');
-  const data = await response.json();
-  if (!data.results?.[0]) throw new Error('City not found');
-  return { lat: data.results[0].latitude, lng: data.results[0].longitude };
-}

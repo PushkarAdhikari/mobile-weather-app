@@ -61,12 +61,6 @@ export function getDayName(dateStr: string, lang: string = 'en'): string {
   }
 }
 
-export function getHourFromTime(time: string, use24hour = false): string {
-  const date = new Date(time.replace(' ', 'T'));
-  if (isNaN(date.getTime())) return time;
-  return date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: !use24hour });
-}
-
 export function getTimeFromDate(dateStr: string, use24hour = false): string {
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return dateStr;
@@ -96,11 +90,6 @@ export function formatHourlyTime(time: string, index: number, use24hour = false)
   const ampm = hourNum >= 12 ? 'PM' : 'AM';
   const display = hourNum === 0 ? 12 : hourNum > 12 ? hourNum - 12 : hourNum;
   return `${display} ${ampm}`;
-}
-
-export function isDayTime(): boolean {
-  const hour = new Date().getHours();
-  return hour >= 6 && hour < 18;
 }
 
 export function formatDate(dateStr: string): string {

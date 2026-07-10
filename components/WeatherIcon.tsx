@@ -173,7 +173,4 @@ export function WeatherIcon({ icon: _icon, code, size = 64, showLabel, isDay = t
   );
 }
 
-export function getWeatherEmoji(code: number, isDay = true): string {
-  const map = isDay ? WEATHER_EMOJI_DAY : WEATHER_EMOJI_NIGHT;
-  return map[code] ?? WEATHER_EMOJI_DAY[code] ?? '🌤';
-}
+

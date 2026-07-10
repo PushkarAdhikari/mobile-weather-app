@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { View, Animated, Easing, StyleSheet } from 'react-native';
+import { View, Animated, Easing } from 'react-native';
 import { GlassCard } from './GlassCard';
 import { theme, ThemeColors } from '../constants/theme';
 
